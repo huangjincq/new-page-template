@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
   const openWebview = vscode.commands.registerCommand('createTemplate.create', (uri: vscode.Uri) => {
     // 创建并显示新的webview
     const panel = vscode.window.createWebviewPanel(
-      'pageSetting1', // 只供内部使用，这个webview的标识
+      'pageSetting', // 只供内部使用，这个webview的标识
       '创建页面设置', // 给用户显示的面板标题
       vscode.ViewColumn.One, // 给新的webview面板一个编辑器视图
       {

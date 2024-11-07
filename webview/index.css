@@ -1,0 +1,24 @@
+body {
+  background-color: #fff;
+}
+.setting-title {
+  text-align: center;
+}
+.settings-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.table-column-editor .textarea {
+  word-break: break-all;
+  word-wrap: break-word;
+}
+.textarea-wrapper {
+  position: relative;
+  .orc-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+  }
+}
