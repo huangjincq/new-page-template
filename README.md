@@ -8,13 +8,11 @@ Omni BO Vscode 插件
 
 ![Demo](/images/demo.gif)
 
-### 1.0.0
-
-用 `Webview` 的形式提交配置数据
-根据 `formColumns` 生成搜索条件
-根据 图像识别，或者文字，动态生成列配置
-自动生成并修改路由文件
+- 用 `Webview` 的形式提交配置数据
+- 根据 `formColumns` 生成搜索条件
+- 根据 图像识别，或者文字，动态生成列配置
+- 自动生成并修改路由文件
 
 ## TODO
 
-- [ ] Webview 打包需要优化
+- Webview 打包需要优化
