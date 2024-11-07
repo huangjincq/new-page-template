@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
         ]
       }
     )
-    panel.webview.html = fs.readFileSync(getPath(`./webview/index.html`), 'utf8')
+    panel.webview.html = fs.readFileSync(getPath(`./index.html`), 'utf8')
     const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.path ?? ''
 
     // 把相对路径传给 页面展示

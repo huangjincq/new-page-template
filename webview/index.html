@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Parcel App</title>
+    <style>
+      @import './style.scss';
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // !这里不能拆文件写，因为js，css 必须内联打包在html里面，而parcel2内联打包只能这样写
+      import './index.js'
+    </script>
+  </body>
+</html>

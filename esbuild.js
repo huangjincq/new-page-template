@@ -45,10 +45,6 @@ async function main() {
           {
             from: [path.join(__dirname, 'templates/**/*')],
             to: [path.join(__dirname, 'dist/templates')]
-          },
-          {
-            from: [path.join(__dirname, '../webview/dist/**/*')],
-            to: [path.join(__dirname, 'dist/webview')]
           }
         ]
       })

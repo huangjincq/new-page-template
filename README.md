@@ -14,3 +14,7 @@ Omni BO Vscode 插件
 根据 `formColumns` 生成搜索条件
 根据 图像识别，或者文字，动态生成列配置
 自动生成并修改路由文件
+
+## TODO
+
+[x] Webview 打包需要优化
