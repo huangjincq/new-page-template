@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/huangjincq/huangjinhello"
+    "url": "https://github.com/huangjincq/omni-bo-vscode-extension"
   },
   "activationEvents": [],
   "main": "./dist/extension.js",
