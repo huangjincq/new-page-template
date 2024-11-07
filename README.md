@@ -6,7 +6,7 @@ Omni BO Vscode 插件
 
 选择文件夹，鼠标右击，出现 “创建 Omni-BO 页面” 选项，可选择页面模版配置，并且可自动创建页面
 
-![Demo](/images/demo.gif)
+![Demo](/images/demo1.gif)
 
 ### 1.0.0
 
@@ -17,4 +17,4 @@ Omni BO Vscode 插件
 
 ## TODO
 
-[x] Webview 打包需要优化
+- [ ] Webview 打包需要优化
