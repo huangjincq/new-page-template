@@ -1,12 +1,13 @@
 body {
   background-color: #fff;
+  margin: 0;
+}
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 .setting-title {
   text-align: center;
-}
-.settings-form {
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .table-column-editor .textarea {

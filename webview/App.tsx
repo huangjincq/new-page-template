@@ -182,7 +182,7 @@ export default function App() {
   ]
 
   return (
-    <>
+    <main className="main">
       <Title level={3} className="setting-title">
         创建页面设置
       </Title>
@@ -201,6 +201,6 @@ export default function App() {
         ]}
         columns={columns}
       />
-    </>
+    </main>
   )
 }

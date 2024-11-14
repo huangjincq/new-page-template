@@ -7,7 +7,7 @@ interface TableColumEditorProps {
   value?: string
   onChange?: (val: string) => void
 }
-const TableColumEditor = ({ value, onChange }: TableColumEditorProps) => {
+const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [percent, setPercent] = useState(0)
 
@@ -22,25 +22,59 @@ const TableColumEditor = ({ value, onChange }: TableColumEditorProps) => {
   const handleFileChange = async (info: any) => {
     const text = await getText(info.file)
     message.success('图片识别成功')
-    onChange?.(text)
+    onChange?.(value + text)
+
     setIsModalOpen(false)
     setPercent(0)
   }
 
   const handlePaste = (event: any) => {
     var items = event.clipboardData.items
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        var blob = items[i].getAsFile()
+
+    for (const item of items) {
+      if (item.type.indexOf('image') !== -1) {
+        var blob = item.getAsFile()
         var reader = new FileReader()
         reader.onload = async function (e: any) {
           const base64Str = e.target.result
           const text = await getText(base64Str)
-          onChange?.(text)
+          insetTextInCursor(e, text + '\n')
         }
         reader.readAsDataURL(blob)
       }
     }
+  }
+
+  // 在光标出插入文本，并且更新state
+  const insetTextInCursor = (e: any, newText: string) => {
+    const textarea = e.target
+
+    // 在光标位置插入一个换行符，并且支持撤销操作
+    document.execCommand('insertText', false, newText)
+    // 创建一个新的input事件，并分发，这样React的onChange监听会被触发，从而更新state
+
+    const event = new Event('input', { bubbles: true })
+    textarea.dispatchEvent(event)
+
+    // 阻止默认事件，避免不必要的副作用
+    e.preventDefault()
+  }
+
+  const handleClick = (e: any) => {
+    const textarea = e.target
+    const selectionStart = textarea.selectionStart
+    const selectionEnd = textarea.selectionEnd
+    const currentValue = textarea.value
+    // 如果当前有选中文字，或者光标前后已经存在换行符或者空格，或者光标后面全是空白字符，或者光标前面的内容都为空，则不执行后续操作
+    if (
+      selectionStart !== selectionEnd ||
+      ['\n'].includes(currentValue.slice(selectionStart - 1, selectionStart)) ||
+      ['\n'].includes(currentValue.slice(selectionStart, selectionStart + 1))
+    ) {
+      return
+    }
+    // 在光标处插入文本
+    insetTextInCursor(e, '\n')
   }
 
   const initTesseract = async () => {
@@ -71,8 +105,9 @@ const TableColumEditor = ({ value, onChange }: TableColumEditorProps) => {
         <div className="textarea-wrapper">
           <Input.TextArea
             onPaste={handlePaste}
+            onClick={handleClick}
             value={value}
-            onChange={(text: any) => onChange?.(text)}
+            onChange={(e) => onChange?.(e.target.value)}
             className="textarea"
             autoSize={{ minRows: 15, maxRows: 30 }}
             placeholder="可直接粘贴截图或文本"
@@ -81,7 +116,9 @@ const TableColumEditor = ({ value, onChange }: TableColumEditorProps) => {
             选择图片
           </Button>
         </div>
-        {percent > 0 && <Progress percent={percent} type="line" format={(percent) => `图像识别进度：${percent}%`} />}
+        <div style={{ width: 500 }}>
+          {percent > 0 && <Progress percent={percent} type="line" format={(percent) => `图像识别进度：${percent}%`} />}
+        </div>
         <Typography.Text type="secondary">
           用<Typography.Text type="danger">换行</Typography.Text>进行分隔, 一行的内容代表为Table中的一列
         </Typography.Text>
