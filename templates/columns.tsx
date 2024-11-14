@@ -32,27 +32,17 @@ export function useColumns({
   handleSubmit
 }) {
   const formColumns: OfficeProColumns[] = [
-    /* form_column_accountNumber */
+    /* form_columns */
     { title: 'Account No.', dataIndex: 'accountNumber', renderFormItem: () => <OfficeAccountSelect /> },
-    /* form_column_accountNumber */
-    /* form_column_security */
     { title: 'Security', dataIndex: 'securityId', renderFormItem: () => <SearchSecurity /> },
-    /* form_column_security */
-    /* form_column_date */
     { title: 'Date', dataIndex: 'date', valueType: 'date' },
-    /* form_column_date */
-    /* form_column_dateRange */
     {
       title: 'Date Range',
       dataIndex: 'dateRange',
       valueType: 'dateRange',
       search: { transform: (value: [string, string]) => ({ startDate: value[0], endDate: value[1] }) }
     },
-    /* form_column_dateRange */
-    /* form_column_digit */
     { title: 'Digit', dataIndex: 'digit', valueType: 'digit' },
-    /* form_column_digit */
-    /* form_column_numberRange */
     {
       title: 'Number Range',
       dataIndex: 'numberRange',
@@ -66,18 +56,16 @@ export function useColumns({
         }
       }
     },
-    /* form_column_numberRange */
-    /* form_column_status */
     {
       title: 'Status',
       dataIndex: 'status',
       valueEnum: statusOptions
     }
-    /* form_column_status */
+    /* form_columns */
   ]
 
   const tableColumns: OfficeProColumns[] = [
-    /* tableColumns */
+    /* table_columns */
     {
       title: 'Account No.',
       dataIndex: 'fromAccountNumber',
@@ -111,7 +99,7 @@ export function useColumns({
       dataIndex: 'updateTime',
       ...ColumnRender.RenderTZTime
     },
-    /* tableColumns */
+    /* table_columns */
     {
       title: 'Action',
       valueType: 'option',

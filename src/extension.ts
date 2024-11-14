@@ -88,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {}
 
 async function createFiles(originalDir: string, outputDir: string, pageConfig: any) {
-  const { pageName, features = [], formColumns = [], tableColumns } = pageConfig
+  const { pageName, features = [], formColumns = [], formColumnCode, tableColumnCode } = pageConfig
 
   const files = await fs.readdir(originalDir)
 
@@ -117,11 +117,15 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
        }}`
         : ''
       text = text.replace(/\/\* feature_export_start \*\/(.|\n|\r)*?\/\* feature_export_end \*\//s, exportCode)
+
+      // 3. 替换 formColumnCode
+      text = text.replace(/\/\* form_columns \*\/(.|\n|\r)*?\/\* form_columns \*\//s, formColumnCode)
+
+      // 3. 替换 tableColumnCode
+      text = text.replace(/\/\* table_columns \*\/(.|\n|\r)*?\/\* table_columns \*\//s, tableColumnCode + ',')
+
       // 2. 根据所需要的功能替换文件内的内容
-      text = extractComments(text, features, formColumns)
-      // 3. 生成tableColumns 并替换
-      const tableColumnStr = generateTableColumns(tableColumns)
-      text = text.replace(/\/\* tableColumns \*\/(.|\n|\r)*?\/\* tableColumns \*\//s, tableColumnStr)
+      text = extractComments(text, features)
 
       // 新的输出文件路径
       let outputFilePath = path.join(outputDir, file)
@@ -135,7 +139,7 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
 }
 
 // 匹配注释模块，进行文件注释
-function extractComments(text: string, features: string[], formColumns: string[]) {
+function extractComments(text: string, features: string[]) {
   allFeatures.forEach((pattern) => {
     if (!features.includes(pattern)) {
       const removePattern = new RegExp(
@@ -146,21 +150,6 @@ function extractComments(text: string, features: string[], formColumns: string[]
     } else {
       let keepPatternStart = new RegExp('{?/\\* feature_' + pattern + '_start \\*/}?', 'g')
       let keepPatternEnd = new RegExp('{?/\\* feature_' + pattern + '_end \\*/}?', 'g')
-      text = text.replace(keepPatternStart, '')
-      text = text.replace(keepPatternEnd, '')
-    }
-  })
-
-  allFormColumns.forEach((pattern) => {
-    if (!formColumns.includes(pattern)) {
-      const removePattern = new RegExp(
-        `\\{?\\/\\* form_column_${pattern} \\*\\/\\}?[\\s\\S]*?\\{?\\/\\* form_column_${pattern} \\*\\/\\}?`,
-        'g'
-      )
-      text = text.replace(removePattern, '')
-    } else {
-      let keepPatternStart = new RegExp('{?/\\* form_column_' + pattern + ' \\*/}?', 'g')
-      let keepPatternEnd = new RegExp('{?/\\* form_column_' + pattern + ' \\*/}?', 'g')
       text = text.replace(keepPatternStart, '')
       text = text.replace(keepPatternEnd, '')
     }
@@ -223,34 +212,4 @@ function modifyRouterJs(dir: string, pageName: string) {
       return findRouterJs(parentDir, depth + 1, track)
     }
   }
-}
-
-// 生成 tableColumns
-const generateTableColumns = (tableColumns: string[]) => {
-  return (
-    tableColumns
-      .map((item) => {
-        let dataIndex = camelCase(item)
-        const dataIndexToLowerCase = dataIndex.toLowerCase()
-        let extraString = ''
-        if (dataIndexToLowerCase.endsWith('date')) {
-          extraString = ', ...ColumnRender.RenderDayTime'
-        }
-        if (dataIndexToLowerCase.endsWith('time')) {
-          extraString = ', ...ColumnRender.RenderTZTime'
-        }
-        if (dataIndexToLowerCase.endsWith('quantity')) {
-          extraString = ', ...ColumnRender.RenderNum'
-        }
-        if (dataIndexToLowerCase.endsWith('accountnumber')) {
-          extraString = ', ...ColumnRender.RenderAccountNo'
-        }
-        // title 处理
-        let title = startCase(lowerCase(item))
-        title = title.replaceAll('Account Number', 'Account No.')
-
-        return `{ title: '${title}', dataIndex: '${dataIndex}'${extraString} }`
-      })
-      .join(',\n\t\t') + ','
-  )
 }
