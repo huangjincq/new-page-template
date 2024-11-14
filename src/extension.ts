@@ -11,7 +11,6 @@ const getPath = (str: string) => path.resolve(__dirname, str)
 // Your extension is activated the very first time the command is executed
 
 const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export']
-const allFormColumns = ['accountNumber', 'security', 'status', 'date', 'dateRange', 'digit', 'numberRange']
 export function activate(context: vscode.ExtensionContext) {
   // webview
   const openWebview = vscode.commands.registerCommand('createTemplate.create', (uri: vscode.Uri) => {

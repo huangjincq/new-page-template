@@ -11,12 +11,12 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     .filter((v) => !!v)
 
   return fields.map((field) => {
-    // 1. 标题大写并分割处理
-    let title: string = startCase(lowerCase(field))
-    title = title.replace(/Account Number/gi, 'Account No.')
+    // 1.
+    let dataIndex = camelCase(field)
+    dataIndex = camelCase(dataIndex.replace(/accountNo/gi, ' account Number'))
 
-    // 2. dataIndex 转成小驼峰
-    const dataIndex = camelCase(field)
+    let title: string = startCase(lowerCase(dataIndex))
+    title = title.replace(/Account Number/gi, 'Account No.')
 
     const lowerCaseIndex = dataIndex.toLowerCase()
 
@@ -24,12 +24,12 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     let columnRender = undefined
 
     // 4. 智能赋值 searchValueType
-    let searchValueType = undefined
+    let searchValueType = SearchValueTypeEnum.Input
     if (lowerCaseIndex.endsWith('accountnumber')) {
       columnRender = 'RenderAccountNo'
       searchValueType = SearchValueTypeEnum.AccountNumber
     }
-    if (lowerCaseIndex.endsWith('securityid')) {
+    if (['securityid', 'symbol', 'cusip', 'isin'].includes(lowerCaseIndex as string)) {
       searchValueType = SearchValueTypeEnum.Security
     }
     if (lowerCaseIndex.endsWith('date')) {
@@ -51,7 +51,7 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
 
     return {
       title: title,
-      dataIndex: camelCase(field),
+      dataIndex,
       columnRender,
       searchValueType
     }
@@ -64,10 +64,10 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
 export const generateColumnsCode = (configs: any[]) => {
   const formColumnCode = configs
     .filter((config) => config.isSearchField)
+    .sort((a, b) => a.searchOrder - b.searchOrder)
     .map((config) => {
       let extraString = searchValueTypeOptions.find((option) => option.value === config.searchValueType)?.code
       extraString = extraString ? `, ${extraString}` : ''
-
       return `{ title: '${config.title}', dataIndex: '${config.dataIndex}'${extraString} }`
     })
     .join(',\n\t\t')

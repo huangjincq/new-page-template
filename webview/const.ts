@@ -23,6 +23,7 @@ export const columnRenderOptions = [
 ]
 
 export enum SearchValueTypeEnum {
+  Input = 'input',
   AccountNumber = 'accountNumber',
   Security = 'security',
   Date = 'date',
@@ -33,6 +34,10 @@ export enum SearchValueTypeEnum {
 }
 
 export const searchValueTypeOptions = [
+  {
+    label: 'Input',
+    value: SearchValueTypeEnum.Input
+  },
   {
     label: 'Account No.',
     value: SearchValueTypeEnum.AccountNumber,

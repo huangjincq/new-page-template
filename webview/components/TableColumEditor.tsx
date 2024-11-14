@@ -74,7 +74,7 @@ const TableColumEditor = ({ value, onChange }: TableColumEditorProps) => {
             value={value}
             onChange={(text: any) => onChange?.(text)}
             className="textarea"
-            autoSize={{ minRows: 5, maxRows: 20 }}
+            autoSize={{ minRows: 15, maxRows: 30 }}
             placeholder="可直接粘贴截图或文本"
           />
           <Button size="small" type="primary" className="orc-icon" onClick={() => setIsModalOpen(true)}>

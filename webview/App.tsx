@@ -4,7 +4,7 @@ import { Button, Checkbox, Form, Input, Typography, Select, Upload, Progress, Mo
 import TableColumEditor from './components/TableColumEditor'
 import { generateColumnsCode, generateTableColumnsConfig } from './utils'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
-import { columnRenderOptions, searchValueTypeOptions } from './const'
+import { columnRenderOptions, SearchValueTypeEnum, searchValueTypeOptions } from './const'
 const { Title } = Typography
 
 const vscode = (window as any).acquireVsCodeApi ? (window as any).acquireVsCodeApi() : undefined
@@ -86,7 +86,7 @@ export default function App() {
 
   const columns: ProFormColumnsType[][] = [
     [
-      { title: '页面路径', dataIndex: 'filePath', fieldProps: { disabled: true } },
+      { title: '页面路径', dataIndex: 'filePath', fieldProps: { readOnly: true } },
       { title: '页面名称', dataIndex: 'pageName', formItemProps: { rules: [{ required: true }] } },
       {
         title: '页面功能',
@@ -154,6 +154,7 @@ export default function App() {
                           dataIndex: 'searchValueType',
                           valueType: 'select',
                           width: 160,
+                          initialValue: SearchValueTypeEnum.Input,
                           formItemProps: { rules: [{ required: isSearchField }] },
                           fieldProps: { options: searchValueTypeOptions, disabled: !isSearchField, showSearch: true }
                         },
@@ -165,7 +166,7 @@ export default function App() {
                             disabled: !isSearchField
                             //controls: false
                           },
-                          width: 120,
+                          width: 140,
                           formItemProps: { rules: [{ required: isSearchField }] }
                         }
                       ]
@@ -182,18 +183,22 @@ export default function App() {
 
   return (
     <>
-      <Title level={2} className="setting-title">
+      <Title level={3} className="setting-title">
         创建页面设置
       </Title>
       <BetaSchemaForm
         formMapRef={formMapRef}
         title="创建页面设置"
         onFinish={onFinish}
-        size="small"
         current={step}
         onCurrentChange={handleStepChange}
         layoutType="StepsForm"
-        steps={[{ title: '基础设置' }, { title: 'Table列高级配置' }]}
+        steps={[
+          {
+            title: '基础设置'
+          },
+          { title: 'Table列高级配置' }
+        ]}
         columns={columns}
       />
     </>
