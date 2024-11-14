@@ -6,6 +6,7 @@ import OfficeAccountSelect from '@library/officeComponents/business/OfficeAccoun
 import OfficeAccountTypeSelect from '@library/officeComponents/business/OfficeAccountTypeSelect'
 import { FormValueTypeEnum } from '@library/officeComponents/OfficeProTable/getColumns'
 import { useState } from 'react'
+import useCommonOptions from '@src/hooks/useCommonOptions'
 
 export enum StatusEnum {
   Success = 'SUCCESS',
@@ -31,11 +32,14 @@ export function useColumns({
   /* feature_delete_end */
   handleSubmit
 }) {
+  const { countryOfTradeOptions } = useCommonOptions()
+
   const formColumns: OfficeProColumns[] = [
     /* form_columns */
     { title: 'Account No.', dataIndex: 'accountNumber', renderFormItem: () => <OfficeAccountSelect /> },
     { title: 'Security', dataIndex: 'securityId', renderFormItem: () => <SearchSecurity /> },
     { title: 'Date', dataIndex: 'date', valueType: 'date' },
+    { title: 'Country Of Trade', dataIndex: 'countryOfTrade', valueEnum: countryOfTradeOptions },
     {
       title: 'Date Range',
       dataIndex: 'dateRange',

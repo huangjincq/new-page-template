@@ -11,27 +11,33 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     .filter((v) => !!v)
 
   return fields.map((field) => {
-    // 1.
+    // 1. 把dataIndex里面 accountNo 替换成  account Number
     let dataIndex = camelCase(field)
     dataIndex = camelCase(dataIndex.replace(/accountNo/gi, ' account Number'))
 
+    // 2. Title 里面把 Account Number 转换成 Account No.
     let title: string = startCase(lowerCase(dataIndex))
     title = title.replace(/Account Number/gi, 'Account No.')
 
     const lowerCaseIndex = dataIndex.toLowerCase()
 
-    // 3. 智能赋值 columnRender
+    // 3. 智能赋值 columnRender 和 智能赋值 searchValueType
     let columnRender = undefined
-
-    // 4. 智能赋值 searchValueType
     let searchValueType = SearchValueTypeEnum.Input
+
     if (lowerCaseIndex.endsWith('accountnumber')) {
       columnRender = 'RenderAccountNo'
       searchValueType = SearchValueTypeEnum.AccountNumber
     }
+
     if (['securityid', 'symbol', 'cusip', 'isin'].includes(lowerCaseIndex as string)) {
       searchValueType = SearchValueTypeEnum.Security
     }
+
+    if (['countryOfTrade'].includes(lowerCaseIndex as string)) {
+      searchValueType = SearchValueTypeEnum.CountryOfTrade
+    }
+
     if (lowerCaseIndex.endsWith('date')) {
       columnRender = 'RenderDayTime'
       searchValueType = SearchValueTypeEnum.Date
@@ -41,10 +47,12 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
       columnRender = 'RenderTZTime'
       searchValueType = SearchValueTypeEnum.Date
     }
+
     if (lowerCaseIndex.endsWith('quantity')) {
       columnRender = 'RenderNum'
       searchValueType = SearchValueTypeEnum.Digit
     }
+
     if (lowerCaseIndex.endsWith('status')) {
       searchValueType = SearchValueTypeEnum.ValueEnum
     }

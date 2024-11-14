@@ -26,6 +26,7 @@ export enum SearchValueTypeEnum {
   Input = 'input',
   AccountNumber = 'accountNumber',
   Security = 'security',
+  CountryOfTrade = 'countryOfTrade',
   Date = 'date',
   DateRange = 'dateRange',
   Digit = 'digit',
@@ -44,6 +45,7 @@ export const searchValueTypeOptions = [
     code: `renderFormItem: () => <OfficeAccountSelect />`
   },
   { label: 'Security', value: SearchValueTypeEnum.Security, code: `renderFormItem: () => <SearchSecurity />` },
+  { label: 'Country Of Trade', value: SearchValueTypeEnum.CountryOfTrade, code: `valueEnum: countryOfTradeOptions` },
   { label: 'Date', value: SearchValueTypeEnum.Date, code: `valueType: 'date'` },
   {
     label: 'Date Range',
