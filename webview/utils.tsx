@@ -31,6 +31,9 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     }
 
     if (['securityid', 'symbol', 'cusip', 'isin'].includes(lowerCaseIndex as string)) {
+      if ('securityid' === lowerCaseIndex) {
+        columnRender = 'RenderSecurityId'
+      }
       searchValueType = SearchValueTypeEnum.Security
     }
 
