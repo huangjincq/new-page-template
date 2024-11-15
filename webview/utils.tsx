@@ -58,6 +58,7 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     }
 
     if (lowerCaseIndex.endsWith('status')) {
+      columnRender = 'ValueEnum'
       searchValueType = SearchValueTypeEnum.ValueEnum
     }
 
