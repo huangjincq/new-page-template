@@ -18,6 +18,7 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     // 2. Title 里面把 Account Number 转换成 Account No.
     let title: string = startCase(lowerCase(dataIndex))
     title = title.replace(/Account Number/gi, 'Account No.')
+    title = title.replace(/Id/gi, 'ID')
 
     const lowerCaseIndex = dataIndex.toLowerCase()
 
