@@ -3,7 +3,7 @@
   "displayName": "Omni BO",
   "description": "Omni BO 插件, 快速创建页面模版",
   "publisher": "huangjin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "icon": "logo.png",
   "engines": {
     "vscode": "^1.89.0"
