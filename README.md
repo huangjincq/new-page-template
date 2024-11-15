@@ -14,3 +14,5 @@ Omni BO Vscode 插件
 - 自动生成并修改路由文件
 
 ## TODO
+
+- valueEnum 渲染的时候 column 也要替换 valueType

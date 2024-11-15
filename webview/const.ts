@@ -1,4 +1,5 @@
 export const columnRenderOptions = [
+  'ValueEnum',
   'RenderAccountNo',
   'RenderAccountMasterNo',
   'RenderSecurityId',

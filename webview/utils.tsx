@@ -85,7 +85,15 @@ export const generateColumnsCode = (configs: any[]) => {
     .join(',\n\t\t')
   const tableColumnCode = configs
     .map((config) => {
-      const extraString = config.columnRender ? `, ...ColumnRender.${config.columnRender}` : ''
+      let extraString = ''
+      if (config.columnRender) {
+        // 这里有个特殊处理 枚举类型,不拼接columnRender
+        if (config.columnRender === 'ValueEnum') {
+          extraString = ', valueEnum: statusOptions'
+        } else {
+          extraString = `, ...ColumnRender.${config.columnRender}`
+        }
+      }
 
       return `{ title: '${config.title}', dataIndex: '${config.dataIndex}'${extraString} }`
     })
