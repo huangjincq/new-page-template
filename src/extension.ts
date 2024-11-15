@@ -93,7 +93,6 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
 
   // 遍历所有文件
   for (const file of files) {
-    console.log(file)
     const filePath = path.join(originalDir, file)
 
     let stats = await fs.lstat(filePath)
