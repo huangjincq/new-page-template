@@ -14,5 +14,3 @@ Omni BO Vscode 插件
 - 自动生成并修改路由文件
 
 ## TODO
-
-- Webview 打包需要优化
