@@ -38,7 +38,7 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
         reader.onload = async function (e: any) {
           const base64Str = e.target.result
           const text = await getText(base64Str)
-          insetTextInCursor(e, text + '\n')
+          insetTextInCursor(e, '\n' + text)
         }
         reader.readAsDataURL(blob)
       }
