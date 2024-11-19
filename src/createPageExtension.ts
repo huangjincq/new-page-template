@@ -14,21 +14,21 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
       '创建页面设置', // 给用户显示的面板标题
       vscode.ViewColumn.One, // 给新的webview面板一个编辑器视图
       {
-        enableScripts: true,
-        retainContextWhenHidden: true, // 隐藏的时候也保留webview，会占用内存
+        enableScripts: true, //! 必须设置，可以执行脚本， 否则 vue react 无法渲染
+        retainContextWhenHidden: true, // 切换到其他tab单时候，的时候也保留webview，但是会占用内存
         localResourceRoots: [
-          vscode.Uri.parse('https://cdn.jsdelivr.net') // 支持外部资源的链接,用于图片OCR
+          vscode.Uri.parse('https://cdn.jsdelivr.net') //! 必须设置 支持外部资源的链接
         ]
       }
     )
     panel.webview.html = fs.readFileSync(getPath(`./index.html`), 'utf8')
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.path ?? ''
 
-    // 把相对路径传给 页面展示
+    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.path ?? ''
     const relativePath = path.relative(workspacePath, uri.fsPath)
+    // 把相对路径传给 webview 展示
     panel.webview.postMessage({ filePath: relativePath })
 
-    // 处理webview中的信息
+    // 处理 webview 提交过来的数据
     panel.webview.onDidReceiveMessage(
       async (message) => {
         switch (message.command) {
@@ -78,16 +78,13 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
 }
 
 async function createFiles(originalDir: string, outputDir: string, pageConfig: any) {
-  const { pageName, features = [], formColumns = [], formColumnCode, tableColumnCode } = pageConfig
+  const { pageName, features = [], formColumnCode, tableColumnCode } = pageConfig
 
   const files = await fs.readdir(originalDir)
-
   // 遍历所有文件
   for (const file of files) {
     const filePath = path.join(originalDir, file)
-
     let stats = await fs.lstat(filePath)
-
     if (stats.isDirectory()) {
       // 递归处理
       await createFiles(filePath, path.join(outputDir, file), pageConfig)
@@ -99,7 +96,7 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
       }
 
       let text = await fs.readFile(filePath, 'utf8')
-      // 1. 是否有前端导出功能，生成路径和模版代码
+      // 2. 是否有前端导出功能，生成路径和模版代码
       const exportCode = features.includes('export')
         ? `frontEndExport={{
            exportFileName: ${'`'}${pageName}_$\{moment().format('yyyy-MM-DD')}${'`'},
@@ -107,23 +104,17 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
          }}`
         : ''
       text = text.replace(/\/\* feature_export_start \*\/(.|\n|\r)*?\/\* feature_export_end \*\//s, exportCode)
-
       // 3. 替换 formColumnCode
       text = text.replace(/\/\* form_columns \*\/(.|\n|\r)*?\/\* form_columns \*\//s, formColumnCode)
-
-      // 3. 替换 tableColumnCode
+      // 4. 替换 tableColumnCode
       text = text.replace(/\/\* table_columns \*\/(.|\n|\r)*?\/\* table_columns \*\//s, tableColumnCode + ',')
-
-      // 2. 根据所需要的功能替换文件内的内容
+      // 5. 根据所需要的功能替换文件内的内容
       text = extractComments(text, features)
-
-      // 新的输出文件路径
+      // 6. 生成路径
       let outputFilePath = path.join(outputDir, file)
-      // 确保目录存在
       await fs.ensureDir(path.dirname(outputFilePath))
-      // 写入新的文件
+      // 7. 写入新的文件
       await fs.writeFile(outputFilePath, text, 'utf8')
-      // console.log(`File ${filePath} updated.`)
     }
   }
 }
