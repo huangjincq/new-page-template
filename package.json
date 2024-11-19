@@ -15,25 +15,56 @@
     "type": "git",
     "url": "https://github.com/huangjincq/omni-bo-vscode-extension"
   },
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "获取单号正则",
+      "properties": {
+        "commit-helper.regex": {
+          "type": "string",
+          "default": "OMNI-\\d+",
+          "description": "根据正则匹配获取当前分支中的jira单号"
+        }
+      }
+    },
     "commands": [
       {
-        "command": "createTemplate.create",
+        "command": "omniBo.createPage",
         "title": "创建Omni-BO页面"
+      },
+      {
+        "command": "omniBo.createCommitFromBranch",
+        "title": "根据Jira单号生成 git commit",
+        "icon": "$(symbol-enum)"
+      },
+      {
+        "command": "omniBo.openBrowserByBranch",
+        "title": "点击打开Jira地址"
       }
     ],
     "menus": {
       "explorer/context": [
         {
+          "command": "omniBo.createPage",
           "when": "explorerResourceIsFolder",
-          "command": "createTemplate.create",
+          "group": "navigation"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "omniBo.createCommitFromBranch",
+          "when": "scmProvider == git",
           "group": "navigation"
         }
       ]
     }
   },
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run build:webview && npm run check-types && npm run lint && node esbuild.js",

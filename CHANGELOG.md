@@ -29,3 +29,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - 可以编辑 table 列配置
 - 使用 `vite` 打包 webView
 - 优化调试脚本
+
+## [3.0.0] - 2024-11-19
+
+### Added
+
+- 增强 Git Commit Message 相关功能
