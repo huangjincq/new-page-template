@@ -19,6 +19,8 @@ Omni BO Vscode 插件
 
 根据分支名称获取`Team Up Id`,生成 `Commit Message`
 
+![Demo](/images/git.gif)
+
 ## 点击打开 Team Up 功能
 
 根据分支名称获取`Team Up Id`,打开链接
