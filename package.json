@@ -1,7 +1,7 @@
 {
   "name": "omni-bo-extension",
   "displayName": "Omni BO",
-  "description": "Omni BO 插件, 快速创建页面模版",
+  "description": "Omni BO 插件",
   "publisher": "huangjin",
   "version": "3.0.0",
   "icon": "logo.png",
