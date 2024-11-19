@@ -32,30 +32,30 @@
     },
     "commands": [
       {
-        "command": "omniBo.createPage",
+        "command": "omni-bo-extension.createPage",
         "title": "创建Omni-BO页面"
       },
       {
-        "command": "omniBo.createCommitFromBranch",
+        "command": "omni-bo-extension.createCommitFromBranch",
         "title": "根据Jira单号生成 git commit",
         "icon": "$(symbol-enum)"
       },
       {
-        "command": "omniBo.openBrowserByBranch",
+        "command": "omni-bo-extension.openBrowserByBranch",
         "title": "点击打开Jira地址"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "omniBo.createPage",
+          "command": "omni-bo-extension.createPage",
           "when": "explorerResourceIsFolder",
           "group": "navigation"
         }
       ],
       "scm/title": [
         {
-          "command": "omniBo.createCommitFromBranch",
+          "command": "omni-bo-extension.createCommitFromBranch",
           "when": "scmProvider == git",
           "group": "navigation"
         }

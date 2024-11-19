@@ -7,7 +7,7 @@ const getPath = (str: string) => path.resolve(__dirname, str)
 const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export']
 
 const createPageExtension = (context: vscode.ExtensionContext) => {
-  const disposable = vscode.commands.registerCommand('omniBo.createPage', (uri: vscode.Uri) => {
+  const disposable = vscode.commands.registerCommand('omni-bo-extension.createPage', (uri: vscode.Uri) => {
     // 创建并显示新的webview
     const panel = vscode.window.createWebviewPanel(
       'pageSetting', // 只供内部使用，这个webview的标识
