@@ -230,7 +230,14 @@ export default function App() {
         ]}
         columns={columns}
       />
-      <Modal title="预览当前配置" open={isModalOpen} onCancel={() => setIsModalOpen(false)} destroyOnClose width="60%">
+      <Modal
+        title="预览当前配置"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        destroyOnClose
+        width="60%"
+        footer={false}
+      >
         <Space direction="vertical" style={{ width: '100%' }}>
           {previewCode.current?.formColumnCode && (
             <>
