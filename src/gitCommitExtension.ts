@@ -9,16 +9,14 @@ const gitCommitExtensions = (context: vscode.ExtensionContext) => {
     return false
   }
 
-  let gitAPI = gitExtension.getAPI(1)
-
-  let repo = gitAPI.repositories[0] //当前git 仓库
-
   // 根据分支名称 生成 commit 消息
   const createCommitFromBranch = vscode.commands.registerCommand(
     'omni-bo-extension.createCommitFromBranch',
     (uri: vscode.Uri) => {
-      const jiraId = getJiraId(repo)
+      const jiraId = getJiraId(gitExtension)
       if (jiraId) {
+        let gitAPI = gitExtension.getAPI(1)
+        let repo = gitAPI.repositories[0] //当前git 仓库
         const commitMessage = `feat[${jiraId}]:`
         repo.inputBox.value = commitMessage
       } else {
@@ -26,11 +24,10 @@ const gitCommitExtensions = (context: vscode.ExtensionContext) => {
       }
     }
   )
-
   context.subscriptions.push(createCommitFromBranch)
 
   const openBrowserByBranch = vscode.commands.registerCommand('omni-bo-extension.openBrowserByBranch', () => {
-    const jiraId = getJiraId(repo)
+    const jiraId = getJiraId(gitExtension)
     if (jiraId) {
       vscode.env.openExternal(
         vscode.Uri.parse(`https://office.webullbroker.com/teamup/develop-management/demand/list?issueJiraKey=${jiraId}`)
@@ -52,7 +49,10 @@ const gitCommitExtensions = (context: vscode.ExtensionContext) => {
 
 export default gitCommitExtensions
 
-const getJiraId = (repo: any) => {
+const getJiraId = (gitExtension: any) => {
+  let gitAPI = gitExtension.getAPI(1)
+
+  let repo = gitAPI.repositories[0] //当前git 仓库
   // 获取用户配置的正则
   const config = vscode.workspace.getConfiguration('commit-helper')
 

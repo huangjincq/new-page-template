@@ -23,3 +23,6 @@ body {
     bottom: 5px;
   }
 }
+.code-render {
+  white-space: pre-line; /* CSS 保持换行 */
+}

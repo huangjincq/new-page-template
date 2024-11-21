@@ -1,11 +1,11 @@
 import { BetaSchemaForm, ProForm, ProFormColumnsType, ProFormInstance } from '@ant-design/pro-components'
 import React, { useState, useRef, useEffect, MutableRefObject } from 'react'
-import { Button, Checkbox, Form, Input, Typography, Select, Upload, Progress, Modal, FormInstance } from 'antd'
+import { Button, Form, Input, Typography, Select, Upload, Progress, Modal, FormInstance, Row, Card, Space } from 'antd'
 import TableColumEditor from './components/TableColumEditor'
 import { generateColumnsCode, generateTableColumnsConfig } from './utils'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { columnRenderOptions, SearchValueTypeEnum, searchValueTypeOptions } from './const'
-const { Title } = Typography
+const { Title, Paragraph } = Typography
 
 const vscode = (window as any).acquireVsCodeApi ? (window as any).acquireVsCodeApi() : undefined
 
@@ -19,8 +19,11 @@ const featuresMap: any = {
 const featuresOptions = Object.keys(featuresMap).map((v) => ({ label: v, value: featuresMap[v] }))
 
 export default function App() {
-  const formMapRef = useRef<React.MutableRefObject<FormInstance<any> | undefined>[]>([])
+  const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([])
   const [step, setStep] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const previewCode = useRef({ formColumnCode: '', tableColumnCode: '' })
+
   // const [form] = Form.useForm()
   const onFinish = async (values: any) => {
     const { formColumnCode, tableColumnCode } = generateColumnsCode(values.tableColumns)
@@ -30,6 +33,19 @@ export default function App() {
       command: 'submit',
       data: JSON.stringify(data)
     })
+  }
+
+  const handlePreview = async () => {
+    let values: any = {}
+    for (const formInstanceRef of formMapRef?.current) {
+      if (formInstanceRef?.current?.validateFieldsReturnFormatValue) {
+        const res = await formInstanceRef?.current?.validateFieldsReturnFormatValue()
+        values = { ...values, ...res }
+      }
+    }
+    const { formColumnCode, tableColumnCode } = generateColumnsCode(values.tableColumns)
+    previewCode.current = { formColumnCode, tableColumnCode }
+    setIsModalOpen(true)
   }
 
   const getFieldsValue = () => {
@@ -98,6 +114,13 @@ export default function App() {
         }
       },
       {
+        title: '自动添加路由',
+        dataIndex: 'autoAddRouter',
+        valueType: 'switch',
+        initialValue: true,
+        tooltip: '开启后将自动生成路由配置'
+      },
+      {
         title: 'Table列初始化',
         dataIndex: 'tableColumnStr',
         valueType: 'checkbox',
@@ -164,7 +187,6 @@ export default function App() {
                           valueType: 'digit',
                           fieldProps: {
                             disabled: !isSearchField
-                            //controls: false
                           },
                           width: 140,
                           formItemProps: { rules: [{ required: isSearchField }] }
@@ -186,6 +208,13 @@ export default function App() {
       <Title level={3} className="setting-title">
         创建页面设置
       </Title>
+      {step === 1 && (
+        <Row justify="end">
+          <Button type="primary" danger size="small" onClick={handlePreview}>
+            预览当前配置
+          </Button>
+        </Row>
+      )}
       <BetaSchemaForm
         formMapRef={formMapRef}
         title="创建页面设置"
@@ -201,6 +230,24 @@ export default function App() {
         ]}
         columns={columns}
       />
+      <Modal title="预览当前配置" open={isModalOpen} onCancel={() => setIsModalOpen(false)} destroyOnClose width="60%">
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {previewCode.current?.formColumnCode && (
+            <>
+              <Card title="Form Columns" size="small">
+                <Paragraph copyable className="code-render">
+                  {previewCode.current?.formColumnCode}
+                </Paragraph>
+              </Card>
+            </>
+          )}
+          <Card title="Table Columns" size="small">
+            <Paragraph copyable className="code-render">
+              {previewCode.current?.tableColumnCode}
+            </Paragraph>
+          </Card>
+        </Space>
+      </Modal>
     </main>
   )
 }

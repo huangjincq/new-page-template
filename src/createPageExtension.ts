@@ -34,7 +34,7 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
         switch (message.command) {
           case 'submit':
             const pageConfig = JSON.parse(message.data)
-            const { pageName } = pageConfig
+            const { pageName, autoAddRouter } = pageConfig
 
             // 1.创建新的文件夹路径
             const workspaceTemplatePath = workspacePath + '/src/pages/_Template/Template'
@@ -56,7 +56,7 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
             fs.writeFileSync(indexPath, newContent)
 
             // 5. 修改路由文件
-            modifyRouterJs(uri.fsPath, pageName)
+            autoAddRouter && modifyRouterJs(uri.fsPath, pageName)
 
             // 6. 默认打开 index文件进行编辑
             vscode.workspace.openTextDocument(indexPath).then((doc) => {
