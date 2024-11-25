@@ -1,5 +1,5 @@
 import { camelCase, lowerCase, startCase } from 'lodash'
-import { SearchValueTypeEnum, searchValueTypeOptions } from './const'
+import { ColumnRenderEnum, columnRenderOptions, SearchValueTypeEnum, searchValueTypeOptions } from './const'
 
 /**
  * @name 根据输入框的文本智能生成tableColumns配置
@@ -27,13 +27,13 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     let searchValueType = SearchValueTypeEnum.Input
 
     if (lowerCaseIndex.endsWith('accountnumber')) {
-      columnRender = 'RenderAccountNo'
+      columnRender = ColumnRenderEnum.AccountNumber
       searchValueType = SearchValueTypeEnum.AccountNumber
     }
 
     if (['securityid', 'symbol', 'cusip', 'isin'].includes(lowerCaseIndex as string)) {
       if ('securityid' === lowerCaseIndex) {
-        columnRender = 'RenderSecurityId'
+        columnRender = ColumnRenderEnum.Security
       }
       searchValueType = SearchValueTypeEnum.Security
     }
@@ -43,23 +43,28 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     }
 
     if (lowerCaseIndex.endsWith('date')) {
-      columnRender = 'RenderDayTime'
+      columnRender = ColumnRenderEnum.RenderDayTime
       searchValueType = SearchValueTypeEnum.Date
     }
 
     if (lowerCaseIndex.endsWith('time')) {
-      columnRender = 'RenderTZTime'
+      columnRender = ColumnRenderEnum.Time
       searchValueType = SearchValueTypeEnum.Date
     }
 
     if (lowerCaseIndex.endsWith('quantity')) {
-      columnRender = 'RenderNum'
+      columnRender = ColumnRenderEnum.Number
       searchValueType = SearchValueTypeEnum.Digit
     }
 
     if (lowerCaseIndex.endsWith('status')) {
-      columnRender = 'ValueEnum'
+      columnRender = ColumnRenderEnum.ValueEnum
       searchValueType = SearchValueTypeEnum.ValueEnum
+    }
+
+    if (lowerCaseIndex.endsWith('approvestatus')) {
+      columnRender = ColumnRenderEnum.ApproveStatus
+      searchValueType = SearchValueTypeEnum.Input
     }
 
     return {
@@ -86,17 +91,15 @@ export const generateColumnsCode = (configs: any[]) => {
     .join(',\n\t\t')
   const tableColumnCode = configs
     .map((config) => {
-      let extraString = ''
-      if (config.columnRender) {
-        // 这里有个特殊处理 枚举类型,不拼接columnRender
-        if (config.columnRender === 'ValueEnum') {
-          extraString = ', valueEnum: statusOptions'
-        } else {
-          extraString = `, ...ColumnRender.${config.columnRender}`
-        }
-      }
+      const code = columnRenderOptions.find((option) => option.value === config.columnRender)?.code
+      const values: any = { $title: config.title, $dataIndex: config.dataIndex }
 
-      return `{ title: '${config.title}', dataIndex: '${config.dataIndex}'${extraString} }`
+      if (code) {
+        return code.replace(/(\$title|\$dataIndex)/g, function (match) {
+          return values[match]
+        })
+      }
+      return `{ title: '${config.title}', dataIndex: '${config.dataIndex}' }`
     })
     .join(',\n\t\t')
   return {
