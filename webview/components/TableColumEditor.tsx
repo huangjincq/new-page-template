@@ -23,7 +23,6 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
     const text = await getText(info.file)
     message.success('图片识别成功')
     onChange?.(value + text)
-
     setIsModalOpen(false)
     setPercent(0)
   }
@@ -38,7 +37,8 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
         reader.onload = async function (e: any) {
           const base64Str = e.target.result
           const text = await getText(base64Str)
-          insetTextInCursor(e, '\n' + text)
+
+          insetTextInCursor(e, text)
         }
         reader.readAsDataURL(blob)
       }
@@ -66,7 +66,9 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
     const selectionEnd = textarea.selectionEnd
     const currentValue = textarea.value
     // 如果当前有选中文字，或者光标前后已经存在换行符或者空格，或者光标后面全是空白字符，或者光标前面的内容都为空，则不执行后续操作
+
     if (
+      !currentValue ||
       selectionStart !== selectionEnd ||
       ['\n'].includes(currentValue.slice(selectionStart - 1, selectionStart)) ||
       ['\n'].includes(currentValue.slice(selectionStart, selectionStart + 1))
@@ -74,7 +76,14 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
       return
     }
     // 在光标处插入文本
-    insetTextInCursor(e, '\n')
+    var textBeforeCursor = textarea.value.substring(0, selectionStart)
+    var textAfterCursor = textarea.value.substring(selectionStart)
+    var prevChar = textBeforeCursor.slice(-1)
+    var nextChar = textAfterCursor.charAt(0)
+
+    if (prevChar === ' ' || nextChar === ' ') {
+      insetTextInCursor(e, '\n')
+    }
   }
 
   const initTesseract = async () => {
