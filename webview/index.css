@@ -27,3 +27,13 @@ body {
 .code-render {
   white-space: pre-line; /* CSS 保持换行 */
 }
+
+.table-columns-config > .ant-pro-card > .ant-pro-card-body {
+  padding: 0;
+}
+.table-columns-config .ant-pro-table-list-toolbar-container {
+  padding-top: 0;
+}
+.table-columns-config .ant-pro-table-list-toolbar-title {
+  font-size: 14px;
+}

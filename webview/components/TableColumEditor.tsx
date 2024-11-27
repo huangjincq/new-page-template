@@ -4,9 +4,10 @@ import { CameraOutlined, TableOutlined } from '@ant-design/icons'
 import Tesseract from 'tesseract.js'
 
 interface TableColumEditorProps {
+  defaultValue?: string
   onSubmit: (val: string) => void
 }
-const TableColumEditor = ({ onSubmit }: TableColumEditorProps) => {
+const TableColumEditor = ({ onSubmit, defaultValue }: TableColumEditorProps) => {
   const [value, setValue] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [percent, setPercent] = useState(0)
@@ -89,6 +90,11 @@ const TableColumEditor = ({ onSubmit }: TableColumEditorProps) => {
     }
   }
 
+  const handleOpen = () => {
+    setIsModalOpen(true)
+    setValue(defaultValue ?? '')
+  }
+
   const initTesseract = async () => {
     workerRef.current = await Tesseract.createWorker('eng', Tesseract.OEM.DEFAULT, {
       logger: (m) => {
@@ -113,7 +119,7 @@ const TableColumEditor = ({ onSubmit }: TableColumEditorProps) => {
 
   return (
     <>
-      <Button type="primary" icon={<TableOutlined />} style={{ marginLeft: 16 }} onClick={() => setIsModalOpen(true)}>
+      <Button type="primary" icon={<TableOutlined />} onClick={handleOpen} size="small">
         图片识别&智能生成Columns
       </Button>
       <Modal

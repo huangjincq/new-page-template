@@ -1,5 +1,6 @@
 import { camelCase, lowerCase, startCase } from 'lodash'
 import { ColumnRenderEnum, columnRenderOptions, SearchValueTypeEnum, searchValueTypeOptions } from './const'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * @name 根据输入框的文本智能生成tableColumns配置
@@ -71,7 +72,8 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
       title: title,
       dataIndex,
       columnRender,
-      searchValueType
+      searchValueType,
+      id: uuidv4()
     }
   })
 }
