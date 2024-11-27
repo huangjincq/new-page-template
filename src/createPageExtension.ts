@@ -34,32 +34,40 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
         switch (message.command) {
           case 'submit':
             const pageConfig = JSON.parse(message.data)
-            const { pageName, autoAddRouter } = pageConfig
+            const { pageName, autoAddRouter, tabConfigs } = pageConfig
+            const hasMultipleTab = tabConfigs.length > 1 // 是否有多个tab
 
-            // 1.创建新的文件夹路径
+            // 1.获取模版文件路径
             const workspaceTemplatePath = workspacePath + '/src/pages/_Template/Template'
 
             const templatePath = fs.existsSync(workspaceTemplatePath + '/index.tsx')
               ? workspaceTemplatePath
               : getPath(`./templates`) // 优先取工作项目里面的template，娶不到就用插件里面的模版
 
-            const targetPath = uri.fsPath + '/' + pageName
-            // 生成文件
-            await createFiles(templatePath, targetPath, pageConfig) // 根据功能删减文件
-            // 2. 修改index.tsx入口组件名
-            const indexPath = path.join(targetPath, 'index.tsx')
-            const indexContent = fs.readFileSync(indexPath, 'utf-8')
-            const newContent = indexContent.replace(
-              'export default function Template',
-              `export default function ${pageName}`
-            )
-            fs.writeFileSync(indexPath, newContent)
+            // 2. 根据配置循环创建Tab页面
+            for (const tabConfig of tabConfigs) {
+              // 如果有多个页签则复制到页签里面
+              const tabNamePath = `${camelCase(pageName)}${hasMultipleTab ? '/' + camelCase(tabConfig.tabName) : ''}`
+              const targetPath = `${uri.fsPath}/${pageName}${hasMultipleTab ? '/' + tabConfig.tabName : ''}`
+              // 2.1 复制、修改 生成文件
+              await createFiles(templatePath, targetPath, tabConfig, tabNamePath) // 根据功能删减文件
+              // 2.2 修改 Tab index.tsx入口组件名
+              const indexPath = path.join(targetPath, 'index.tsx')
+              const indexContent = fs.readFileSync(indexPath, 'utf-8')
+              const newContent = indexContent.replace(
+                'export default function Template',
+                `export default function ${tabConfig.tabName}`
+              )
+              fs.writeFileSync(indexPath, newContent)
+            }
+            // 3. 如果是多tab的需要创建入口文件
+            hasMultipleTab && createMultipleTabIndexFile(tabConfigs, pageName, uri)
 
             // 5. 修改路由文件
             autoAddRouter && modifyRouterJs(uri.fsPath, pageName)
 
             // 6. 默认打开 index文件进行编辑
-            vscode.workspace.openTextDocument(indexPath).then((doc) => {
+            vscode.workspace.openTextDocument(path.join(`${uri.fsPath}/${pageName}`, 'index.tsx')).then((doc) => {
               vscode.window.showTextDocument(doc)
             })
             // 7. 提示创建页面成功
@@ -77,8 +85,8 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(disposable)
 }
 
-async function createFiles(originalDir: string, outputDir: string, pageConfig: any) {
-  const { pageName, features = [], formColumnCode, tableColumnCode } = pageConfig
+async function createFiles(originalDir: string, outputDir: string, tabConfig: any, tabNamePath: string) {
+  const { features = [], formColumnCode, tableColumnCode } = tabConfig
 
   const files = await fs.readdir(originalDir)
   // 遍历所有文件
@@ -87,7 +95,7 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
     let stats = await fs.lstat(filePath)
     if (stats.isDirectory()) {
       // 递归处理
-      await createFiles(filePath, path.join(outputDir, file), pageConfig)
+      await createFiles(filePath, path.join(outputDir, file), tabConfig, tabNamePath)
       // 只处理 .tsx, .ts文件
     } else if (['.tsx', '.ts'].includes(path.extname(file))) {
       // 1. 如果是Modal 组件，并且不是在功能里面的，跳过复制
@@ -99,8 +107,8 @@ async function createFiles(originalDir: string, outputDir: string, pageConfig: a
       // 2. 是否有前端导出功能，生成路径和模版代码
       const exportCode = features.includes('export')
         ? `frontEndExport={{
-           exportFileName: ${'`'}${pageName}_$\{moment().format('yyyy-MM-DD')}${'`'},
-           permissionUrl: '/pt/${camelCase(pageName)}/export' 
+           exportFileName: ${'`'}${tabNamePath}_$\{moment().format('yyyy-MM-DD')}${'`'},
+           permissionUrl: '/pt/${tabNamePath}/export' 
          }}`
         : ''
       text = text.replace(/\/\* feature_export_start \*\/(.|\n|\r)*?\/\* feature_export_end \*\//s, exportCode)
@@ -168,10 +176,10 @@ function modifyRouterJs(dir: string, pageName: string) {
   function generateRouteCode(filename: string, relativePath: string) {
     const name = filename.charAt(0).toUpperCase() + filename.slice(1) // 首字母大写
     const route = `  {
-      name: '${startCase(name)}',
-      route: '/pt/${camelCase(filename)}',
-      component: Loadable(() => import('${relativePath}${filename}'))
-    }`
+    name: '${startCase(name)}',
+    route: '/pt/${camelCase(filename)}',
+    component: Loadable(() => import('${relativePath}${filename}'))
+  }`
     return route
   }
 
@@ -193,6 +201,42 @@ function modifyRouterJs(dir: string, pageName: string) {
       return findRouterJs(parentDir, depth + 1, track)
     }
   }
+}
+
+// 创建 多Tab的Index文件
+const createMultipleTabIndexFile = (tabConfigs: any[], pageName: string, uri: vscode.Uri) => {
+  const importCode = tabConfigs.map(({ tabName }) => `import ${tabName} from './${tabName}'`).join('\n')
+
+  const dataSourceCode = tabConfigs
+    .map(
+      ({ tabName }) => `{
+          url: '/pt/${camelCase(pageName)}/${camelCase(tabName)}', 
+          element: (
+            <TabPane tab='${startCase(tabName)}' key='${camelCase(tabName)}'>
+              <${tabName} />
+            </TabPane>
+          ),
+        }`
+    )
+    .join(',\n\t\t\t\t')
+
+  const code = `import { Tabs } from 'antd'
+import { OfficeTabs } from '@library/officeComponents'
+${importCode}
+
+const TabPane = Tabs.TabPane
+
+export default function ${pageName}() {
+  return (
+    <OfficeTabs
+      dataSource={[
+        ${dataSourceCode}
+      ]}
+    />
+  )
+}`
+
+  fs.writeFileSync(`${uri.fsPath}/${pageName}/index.tsx`, code)
 }
 
 export default createPageExtension

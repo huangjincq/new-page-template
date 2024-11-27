@@ -109,3 +109,9 @@ export const generateColumnsCode = (configs: any[]) => {
     tableColumnCode
   }
 }
+
+// 把字符串转成大驼峰
+export function toPascalCase(str: string) {
+  const _camelCase = camelCase(str)
+  return _camelCase[0].toUpperCase() + _camelCase.substring(1)
+}

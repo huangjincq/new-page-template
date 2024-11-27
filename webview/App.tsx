@@ -8,7 +8,7 @@ import {
 import React, { useState, useRef, useEffect, MutableRefObject, useMemo } from 'react'
 import { Button, Typography, Modal, Row, Card, Space, Tabs, Col, Tooltip, message, Skeleton, FormInstance } from 'antd'
 import TableColumEditor from './components/TableColumEditor'
-import { generateColumnsCode, generateTableColumnsConfig } from './utils'
+import { generateColumnsCode, generateTableColumnsConfig, toPascalCase } from './utils'
 import { ExclamationCircleOutlined, MehOutlined, QuestionCircleOutlined, TableOutlined } from '@ant-design/icons'
 import { columnRenderOptions, SearchValueTypeEnum, searchValueTypeOptions } from './const'
 const { Title, Paragraph } = Typography
@@ -54,11 +54,12 @@ export default function App() {
 
     const data = {
       ...pageConfig,
-      tabConfig: newTabs.map((tab) => {
+      pageName: toPascalCase(pageConfig.pageName),
+      tabConfigs: newTabs.map((tab) => {
         const { formColumnCode, tableColumnCode } = generateColumnsCode(tab.tableColumns)
         return {
           features: tab.features,
-          tabName: tab.tabName,
+          tabName: toPascalCase(tab.tabName),
           formColumnCode,
           tableColumnCode
         }
@@ -87,7 +88,7 @@ export default function App() {
     const newPanes = await setAndReturnNewTabs()
     const newActiveKey = uuidv4()
     newPanes.push({ label: 'New Tab', key: newActiveKey, tableColumns: [] })
-    setTableValue([])
+    // setTableValue([])
     setTabs(newPanes)
     toggleTab(newActiveKey)
   }
@@ -163,7 +164,7 @@ export default function App() {
       return
     }
     const newTabs = await setAndReturnNewTabs()
-    setTableValue(newTabs.find((tab) => tab.key === key)?.tableColumns ?? [])
+    // setTableValue(newTabs.find((tab) => tab.key === key)?.tableColumns ?? [])
     setTabs(newTabs)
     toggleTab(key)
   }
@@ -171,7 +172,7 @@ export default function App() {
   const handleCreateTableColumns = async (str: string) => {
     const currentTableColumns = await tableTableRef.current?.getFieldsValue?.()
 
-    const tableColumns = generateTableColumnsConfig(str)
+    const tableColumns: any = generateTableColumnsConfig(str)
 
     if (Object.keys(currentTableColumns).length) {
       Modal.confirm({
@@ -179,14 +180,12 @@ export default function App() {
         icon: <ExclamationCircleOutlined />,
         content: '确定覆盖, 将根据Table列初始化配置重新生成配, 请确认是否继续？',
         onOk() {
-          setTableValue(tableColumns)
-          setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str } : tab)))
+          setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str, tableColumns } : tab)))
         },
         onCancel() {}
       })
     } else {
-      setTableValue(tableColumns)
-      setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str } : tab)))
+      setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str, tableColumns } : tab)))
     }
   }
 
@@ -202,6 +201,10 @@ export default function App() {
       }
     })
   }, [])
+
+  useEffect(() => {
+    setTableValue(activeTab?.tableColumns ?? [])
+  }, [activeTab?.tableColumns])
 
   const pageColumns = [
     {
@@ -360,7 +363,7 @@ export default function App() {
           onChange={handleTabChange}
           activeKey={activeTabKey}
           onEdit={handleTabEdit}
-          items={tabs}
+          items={tabs.map((v) => ({ ...v, closable: tabs.length > 1 }))}
         />
         {loading ? (
           <Skeleton />
