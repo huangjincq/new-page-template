@@ -1,13 +1,13 @@
 import { Input, Typography, Upload, Modal, Tooltip, Progress, message, Button } from 'antd'
 import React, { useState, useRef, useEffect } from 'react'
-import { CameraOutlined } from '@ant-design/icons'
+import { CameraOutlined, TableOutlined } from '@ant-design/icons'
 import Tesseract from 'tesseract.js'
 
 interface TableColumEditorProps {
-  value?: string
-  onChange?: (val: string) => void
+  onSubmit: (val: string) => void
 }
-const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
+const TableColumEditor = ({ onSubmit }: TableColumEditorProps) => {
+  const [value, setValue] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [percent, setPercent] = useState(0)
 
@@ -19,12 +19,15 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
     return text
   }
 
+  const handleSubmit = async () => {
+    onSubmit?.(value)
+    setIsModalOpen(false)
+  }
+
   const handleFileChange = async (info: any) => {
     const text = await getText(info.file)
+    setValue(value + text)
     message.success('图片识别成功')
-    onChange?.(value + text)
-    setIsModalOpen(false)
-    setPercent(0)
   }
 
   const handlePaste = (event: any) => {
@@ -110,39 +113,22 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
 
   return (
     <>
-      <div className="table-column-editor">
-        <div className="textarea-wrapper">
-          <Input.TextArea
-            onPaste={handlePaste}
-            onClick={handleClick}
-            value={value}
-            onChange={(e) => onChange?.(e.target.value)}
-            className="textarea"
-            autoSize={{ minRows: 15, maxRows: 30 }}
-            placeholder="可直接粘贴截图或文本"
-          />
-          <Button size="small" type="primary" className="orc-icon" onClick={() => setIsModalOpen(true)}>
-            选择图片
-          </Button>
-        </div>
-        <div style={{ width: 500 }}>
-          {percent > 0 && <Progress percent={percent} type="line" format={(percent) => `图像识别进度：${percent}%`} />}
-        </div>
-        <Typography.Text type="secondary">
-          用<Typography.Text type="danger">换行</Typography.Text>进行分隔, 一行的内容代表为Table中的一列
-        </Typography.Text>
-        <Typography.Paragraph type="warning">可直接粘贴截图或文本，图像识别仅支持英文</Typography.Paragraph>
-      </div>
+      <Button type="primary" icon={<TableOutlined />} style={{ marginLeft: 16 }} onClick={() => setIsModalOpen(true)}>
+        图片识别&智能生成Columns
+      </Button>
       <Modal
         title="根据图片自动识别生成Table列"
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         maskClosable={false}
         keyboard={false}
-        footer={null}
+        okButtonProps={{
+          disabled: !value
+        }}
+        onOk={handleSubmit}
+        width={550}
       >
         <Upload.Dragger
-          style={{ marginTop: 10 }}
           customRequest={handleFileChange}
           maxCount={1}
           showUploadList={false}
@@ -152,9 +138,35 @@ const TableColumEditor = ({ value = '', onChange }: TableColumEditorProps) => {
           <p className="ant-upload-drag-icon">
             <CameraOutlined />
           </p>
-          <p className="ant-upload-text">单击或拖动图片到此区域进行识别</p>
-          {percent > 0 && <Progress percent={percent} type="line" />}
         </Upload.Dragger>
+        <Typography.Paragraph type="warning" style={{ marginTop: 4, marginBottom: 4 }}>
+          可直接粘贴截图或文本到下方输入框中，也可单击或拖拽图片到上方控件
+        </Typography.Paragraph>
+        <div className="table-column-editor">
+          <div className="textarea-wrapper">
+            <Input.TextArea
+              onPaste={handlePaste}
+              onClick={handleClick}
+              value={value}
+              onChange={(e) => setValue?.(e.target.value)}
+              className="textarea"
+              autoSize={{ minRows: 15, maxRows: 30 }}
+              placeholder="可直接粘贴截图或文本"
+            />
+          </div>
+          <div style={{ width: 500 }}>
+            {percent > 0 && (
+              <Progress percent={percent} type="line" format={(percent) => `图像识别进度：${percent}%`} />
+            )}
+          </div>
+          <Typography.Text type="secondary">
+            用
+            <Typography.Text type="danger">
+              <b>换行</b>
+            </Typography.Text>
+            进行分隔, 一行的内容代表为Table中的一列
+          </Typography.Text>
+        </div>
       </Modal>
     </>
   )
