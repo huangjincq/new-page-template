@@ -174,21 +174,20 @@ export default function App() {
     const tableColumns = generateTableColumnsConfig(str)
 
     if (Object.keys(currentTableColumns).length) {
-      return Modal.confirm({
-        title: 'Table列高级配置中已存在数据',
+      Modal.confirm({
+        title: 'Table Columns 配置中已存在数据',
         icon: <ExclamationCircleOutlined />,
-        content: '点击覆盖，将根据Table列初始化配置重新生成配置，点不覆盖，直接进入下一步，请确认',
-        okText: '覆盖',
-        cancelText: '不覆盖',
+        content: '确定覆盖, 将根据Table列初始化配置重新生成配, 请确认是否继续？',
         onOk() {
           setTableValue(tableColumns)
+          setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str } : tab)))
         },
         onCancel() {}
       })
     } else {
       setTableValue(tableColumns)
+      setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str } : tab)))
     }
-    setTabs(tabs.map((tab) => (tab.key === activeTabKey ? { ...tab, tableColumnStr: str } : tab)))
   }
 
   const handleTableChange = (record: any, recordList: any[]) => {
@@ -332,7 +331,7 @@ export default function App() {
       <Title level={3} className="setting-title">
         创建页面
       </Title>
-      <Card title="页面设置" size="small">
+      <Card title="页面设置" size="small" className="page-setting">
         <BetaSchemaForm
           title="创建页面设置"
           formRef={pageFormRef}
