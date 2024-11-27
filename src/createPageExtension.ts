@@ -4,7 +4,7 @@ import * as path from 'path'
 import { camelCase, lowerCase, startCase } from 'lodash'
 
 const getPath = (str: string) => path.resolve(__dirname, str)
-const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export']
+const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export', 'button']
 
 const createPageExtension = (context: vscode.ExtensionContext) => {
   const disposable = vscode.commands.registerCommand('omni-bo-extension.createPage', (uri: vscode.Uri) => {

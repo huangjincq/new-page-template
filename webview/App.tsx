@@ -22,6 +22,7 @@ const featuresMap: any = {
   详情: 'detail',
   删除: 'delete',
   导出: 'export',
+  按钮操作: 'button',
   批量操作: 'batch'
 }
 const featuresOptions = Object.keys(featuresMap).map((v) => ({ label: v, value: featuresMap[v] }))

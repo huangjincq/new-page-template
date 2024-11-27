@@ -71,11 +71,13 @@ export default function Template() {
   }
   /* feature_detail_end */
 
+  /* feature_button_start */
   const handleSubmit = async (selectedRow) => {
     // TODO do something
     SuccessMsg()
     actionRef.current.reload()
   }
+  /* feature_button_end */
 
   /* feature_delete_start */
   const handleDelete = async (selectedRow = null) => {
@@ -100,7 +102,9 @@ export default function Template() {
     /* feature_delete_start */
     handleDelete,
     /* feature_delete_end */
+    /* feature_button_start */
     handleSubmit
+    /* feature_button_end */
   })
 
   const onClose = (refresh?: boolean) => {

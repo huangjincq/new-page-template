@@ -31,7 +31,9 @@ export function useColumns({
   /* feature_delete_start */
   handleDelete,
   /* feature_delete_end */
+  /* feature_button_start */
   handleSubmit
+  /* feature_button_end */
 }) {
   const { countryOfTradeOptions } = useCommonOptions()
 
@@ -125,12 +127,14 @@ export function useColumns({
               onClick: () => handleDetailModal(row)
             },
             /* feature_detail_end */
+            /* feature_button_start */
             {
               url: '', // TODO set permission url
               name: 'Submit',
               onClick: () => handleSubmit(row),
               showConfirm: true
             },
+            /* feature_button_end */
             /* feature_delete_start */
             {
               url: '', // TODO set permission url
