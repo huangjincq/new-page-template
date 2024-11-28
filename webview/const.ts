@@ -39,7 +39,7 @@ export const columnRenderOptions = [
   {
     label: 'RenderDayTime',
     value: ColumnRenderEnum.RenderDayTime,
-    code: `{ title: '$title', dataIndex: '$dataIndex', ...ColumnRender.RenderAccountNo }`
+    code: `{ title: '$title', dataIndex: '$dataIndex', ...ColumnRender.RenderDayTime }`
   },
   {
     label: 'RenderMoney',
