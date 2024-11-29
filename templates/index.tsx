@@ -139,7 +139,7 @@ export default function Template() {
         /* feature_export_end */
         toolbar={{
           title: (
-            <Space align="end" size="middle">
+            <Space align="center" size="middle">
               /* feature_edit_start */
               <OfficeButton
                 url="" // TODO set permission url
