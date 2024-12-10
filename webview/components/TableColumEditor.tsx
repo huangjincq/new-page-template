@@ -156,7 +156,7 @@ const TableColumEditor = ({ onSubmit, defaultValue }: TableColumEditorProps) => 
               value={value}
               onChange={(e) => setValue?.(e.target.value)}
               className="textarea"
-              autoSize={{ minRows: 15, maxRows: 30 }}
+              autoSize={{ minRows: 15, maxRows: 15 }}
               placeholder="可直接粘贴截图或文本"
             />
           </div>
