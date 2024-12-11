@@ -211,7 +211,7 @@ export default function App() {
     {
       title: '页面路径',
       dataIndex: 'filePath',
-      renderFormItem: () => <div>{filePath ?? ''}</div>,
+      renderFormItem: () => <Typography.Text ellipsis={{ tooltip: filePath }}>{filePath ?? ''}</Typography.Text>,
       colProps: { span: 7 }
     },
     {
