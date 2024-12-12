@@ -3,7 +3,7 @@
   "displayName": "Omni BO",
   "description": "Omni BO 插件",
   "publisher": "huangjin",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "icon": "logo.png",
   "engines": {
     "vscode": "^1.89.0"
