@@ -20,3 +20,9 @@ Omni BO Vscode 插件
 ![Demo](/images/git.gif)
 
 ### 根据分支名称获取`Team Up Id`, 打开 `Team Up`
+
+### todo
+
+columns config 可支持动态配置
+多工作流配置
+detail 页面配置支持
