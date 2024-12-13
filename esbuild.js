@@ -43,8 +43,8 @@ async function main() {
       copy({
         assets: [
           {
-            from: [path.join(__dirname, 'templates/**/*')],
-            to: [path.join(__dirname, 'dist/templates')]
+            from: [path.join(__dirname, 'templateConfig/**/*')],
+            to: [path.join(__dirname, 'dist/templateConfig')]
           }
         ]
       })

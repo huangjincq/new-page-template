@@ -15,6 +15,10 @@ Omni BO Vscode 插件
 
 ![Demo](/images/example.gif)
 
+### 配置模版文件
+
+优先读取项目根目录下  `.vscode/template` 中的模版文件，可根据自己的规则配置模版文件
+
 ### 根据分支名称获取`Team Up Id`, 生成 `Commit Message`
 
 ![Demo](/images/git.gif)

@@ -1,13 +1,28 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import { camelCase, lowerCase, startCase } from 'lodash'
+import { camelCase, startCase } from 'lodash'
 
 const getPath = (str: string) => path.resolve(__dirname, str)
 const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export', 'button']
+interface ITemplateConfig {
+  routePrefix: string
+}
 
 const createPageExtension = (context: vscode.ExtensionContext) => {
   const disposable = vscode.commands.registerCommand('omni-bo-extension.createPage', (uri: vscode.Uri) => {
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)
+    const workspacePath = workspaceFolder?.uri.path ?? ''
+
+    let templateConfig: ITemplateConfig = { routePrefix: '' }
+    try {
+      const templateConfigPath = fs.existsSync(workspacePath + '/.vscode/templateConfig.json')
+        ? workspacePath + '/.vscode/templateConfig.json'
+        : getPath(`./templateConfig/templateConfig.json`) // 优先取工作项目里面的template，娶不到就用插件里面的模版
+      const data = fs.readFileSync(templateConfigPath, 'utf8')
+      templateConfig = JSON.parse(data)
+    } catch (error) {}
+
     // 创建并显示新的webview
     const panel = vscode.window.createWebviewPanel(
       'pageSetting', // 只供内部使用，这个webview的标识
@@ -23,9 +38,6 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
     )
     panel.webview.html = fs.readFileSync(getPath(`./index.html`), 'utf8')
 
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)
-
-    const workspacePath = workspaceFolder?.uri.path ?? ''
     const relativePath = path.relative(workspacePath, uri.fsPath)
     // 把相对路径传给 webview 展示
     panel.webview.postMessage({ filePath: relativePath })
@@ -40,19 +52,18 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
             const hasMultipleTab = tabConfigs.length > 1 // 是否有多个tab
 
             // 1.获取模版文件路径
-            const workspaceTemplatePath = workspacePath + '/src/pages/_Template/Template'
+            const workspaceTemplatePath = workspacePath + '/.vscode/template'
 
-            const templatePath = fs.existsSync(workspaceTemplatePath + '/index.tsx')
+            const templatePath = fs.existsSync(workspaceTemplatePath)
               ? workspaceTemplatePath
-              : getPath(`./templates`) // 优先取工作项目里面的template，娶不到就用插件里面的模版
-
+              : getPath(`./templateConfig/template`) // 优先取工作项目里面的template，娶不到就用插件里面的模版
             // 2. 根据配置循环创建Tab页面
             for (const tabConfig of tabConfigs) {
               // 如果有多个页签则复制到页签里面
               const tabNamePath = `${camelCase(pageName)}${hasMultipleTab ? '/' + camelCase(tabConfig.tabName) : ''}`
               const targetPath = `${uri.fsPath}/${pageName}${hasMultipleTab ? '/' + tabConfig.tabName : ''}`
               // 2.1 复制、修改 生成文件
-              await createFiles(templatePath, targetPath, tabConfig, tabNamePath) // 根据功能删减文件
+              await createFiles(templatePath, targetPath, tabConfig, tabNamePath, templateConfig) // 根据功能删减文件
               // 2.2 修改 Tab index.tsx入口组件名
               const indexPath = path.join(targetPath, 'index.tsx')
               const indexContent = fs.readFileSync(indexPath, 'utf-8')
@@ -63,10 +74,10 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
               fs.writeFileSync(indexPath, newContent)
             }
             // 3. 如果是多tab的需要创建入口文件
-            hasMultipleTab && createMultipleTabIndexFile(tabConfigs, pageName, uri)
+            hasMultipleTab && createMultipleTabIndexFile(tabConfigs, pageName, uri, templateConfig)
 
             // 5. 修改路由文件
-            autoAddRouter && modifyRouterJs(uri.fsPath, pageName)
+            autoAddRouter && modifyRouterJs(uri.fsPath, pageName, templateConfig)
 
             // 6. 默认打开 index文件进行编辑
             vscode.workspace.openTextDocument(path.join(`${uri.fsPath}/${pageName}`, 'index.tsx')).then((doc) => {
@@ -87,7 +98,13 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
   context.subscriptions.push(disposable)
 }
 
-async function createFiles(originalDir: string, outputDir: string, tabConfig: any, tabNamePath: string) {
+async function createFiles(
+  originalDir: string,
+  outputDir: string,
+  tabConfig: any,
+  tabNamePath: string,
+  templateConfig: ITemplateConfig
+) {
   const { features = [], formColumnCode, tableColumnCode } = tabConfig
 
   const files = await fs.readdir(originalDir)
@@ -97,7 +114,7 @@ async function createFiles(originalDir: string, outputDir: string, tabConfig: an
     let stats = await fs.lstat(filePath)
     if (stats.isDirectory()) {
       // 递归处理
-      await createFiles(filePath, path.join(outputDir, file), tabConfig, tabNamePath)
+      await createFiles(filePath, path.join(outputDir, file), tabConfig, tabNamePath, templateConfig)
       // 只处理 .tsx, .ts文件
     } else if (['.tsx', '.ts'].includes(path.extname(file))) {
       // 1. 如果是Modal 组件，并且不是在功能里面的，跳过复制
@@ -110,7 +127,7 @@ async function createFiles(originalDir: string, outputDir: string, tabConfig: an
       const exportCode = features.includes('export')
         ? `frontEndExport={{
            exportFileName: ${'`'}${tabNamePath}_$\{moment().format('yyyy-MM-DD')}${'`'},
-           permissionUrl: '/pt/${tabNamePath}/export' 
+           permissionUrl: '${templateConfig.routePrefix}/${tabNamePath}/export' 
          }}`
         : ''
       text = text.replace(/\/\* feature_export_start \*\/(.|\n|\r)*?\/\* feature_export_end \*\//s, exportCode)
@@ -150,7 +167,7 @@ function extractComments(text: string, features: string[]) {
 }
 
 // 修改路由文件
-function modifyRouterJs(dir: string, pageName: string) {
+function modifyRouterJs(dir: string, pageName: string, templateConfig: ITemplateConfig) {
   // 1. 查找路由文件
   const { routerPath, track: relativePath } = findRouterJs(dir) || {}
 
@@ -160,7 +177,7 @@ function modifyRouterJs(dir: string, pageName: string) {
   }
 
   // 2. 生成路由模版代码
-  const content = generateRouteCode(pageName, relativePath!)
+  const content = generateRouteCode(pageName, relativePath!, templateConfig)
   const fileContent = fs.readFileSync(routerPath, 'utf8')
   const insertPos = getInsertPos(fileContent)
   // 插入指定位置
@@ -175,11 +192,11 @@ function modifyRouterJs(dir: string, pageName: string) {
   }
 
   // 生成新的路由配置代码
-  function generateRouteCode(filename: string, relativePath: string) {
+  function generateRouteCode(filename: string, relativePath: string, templateConfig: ITemplateConfig) {
     const name = filename.charAt(0).toUpperCase() + filename.slice(1) // 首字母大写
     const route = `  {
     name: '${startCase(name)}',
-    route: '/pt/${camelCase(filename)}',
+    route: '${templateConfig.routePrefix}/${camelCase(filename)}',
     component: Loadable(() => import('${relativePath}${filename}'))
   }`
     return route
@@ -206,13 +223,18 @@ function modifyRouterJs(dir: string, pageName: string) {
 }
 
 // 创建 多Tab的Index文件
-const createMultipleTabIndexFile = (tabConfigs: any[], pageName: string, uri: vscode.Uri) => {
+const createMultipleTabIndexFile = (
+  tabConfigs: any[],
+  pageName: string,
+  uri: vscode.Uri,
+  templateConfig: ITemplateConfig
+) => {
   const importCode = tabConfigs.map(({ tabName }) => `import ${tabName} from './${tabName}'`).join('\n')
 
   const dataSourceCode = tabConfigs
     .map(
       ({ tabName }) => `{
-          url: '/pt/${camelCase(pageName)}/${camelCase(tabName)}', 
+          url: '${templateConfig.routePrefix}/${camelCase(pageName)}/${camelCase(tabName)}', 
           element: (
             <TabPane tab='${startCase(tabName)}' key='${camelCase(tabName)}'>
               <${tabName} />
