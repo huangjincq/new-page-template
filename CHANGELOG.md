@@ -35,3 +35,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - 增强 Git Commit Message 相关功能
+- 
+## [3.1.0] - 2024-12-13
+
+### Added
+- 支持多单个 `Vscode` 打开多个 `workSpace`
+- columns config 可支持动态配置
+- detail 页面配置支持
+- feature_download
+

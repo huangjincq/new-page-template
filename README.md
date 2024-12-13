@@ -17,7 +17,21 @@ Omni BO Vscode 插件
 
 ### 配置模版文件
 
-优先读取项目根目录下  `.vscode/template` 中的模版文件，可根据自己的规则配置模版文件
+1. 优先读取项目根目录下  `.vscode/template` 中的模版文件，可根据自己的规则配置模版
+2. 优先读取项目根目录下  `.vscode/templateConfig.json` 中的配置
+   
+| 字段名      | 描述 |
+| ----------- | ----------- |
+| routePrefix  | 路由前缀 |
+| searchTypeOptions | 搜索条件的选项和模版 |
+| columnRenderOptions  | 表格和详情的渲染函数模版 |
+
+3. 如何查看默认配置
+   
+   在Finder中，按下 Command + Shift + G 来打开前往文件夹的窗口
+
+   输入 `~/.vscode/extensions/huangjin.omni-bo-extension-当前插件版本(例如：3.1.0)/dist` 查看默认配置
+   
 
 ### 根据分支名称获取`Team Up Id`, 生成 `Commit Message`
 
@@ -25,9 +39,3 @@ Omni BO Vscode 插件
 
 ### 根据分支名称获取`Team Up Id`, 打开 `Team Up`
 
-### todo
-
-- [x] 支持多单个 `Vscode` 打开多个 `workSpace`
-- [x] columns config 可支持动态配置
-- [x] detail 页面配置支持
-- [x] feature_download
