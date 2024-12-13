@@ -4,7 +4,7 @@ import * as path from 'path'
 import { camelCase, startCase } from 'lodash'
 
 const getPath = (str: string) => path.resolve(__dirname, str)
-const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export', 'button']
+const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export', 'download', 'button']
 interface ITemplateConfig {
   routePrefix: string
   columnRenderOptions: { label: string; value: string; code: string }[]

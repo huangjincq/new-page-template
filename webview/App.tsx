@@ -22,6 +22,7 @@ const featuresMap: any = {
   详情: 'detail',
   删除: 'delete',
   导出: 'export',
+  下载: 'download',
   按钮操作: 'button',
   批量删除: 'batch'
 }
