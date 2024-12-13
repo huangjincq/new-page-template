@@ -13,27 +13,34 @@ const gitCommitExtensions = (context: vscode.ExtensionContext) => {
   const createCommitFromBranch = vscode.commands.registerCommand(
     'omni-bo-extension.createCommitFromBranch',
     (uri: vscode.Uri) => {
-      const jiraId = getJiraId(gitExtension)
-      if (jiraId) {
-        let gitAPI = gitExtension.getAPI(1)
-        let repo = gitAPI.repositories[0] //当前git 仓库
-        const commitMessage = `feat[${jiraId}]:`
-        repo.inputBox.value = commitMessage
-      } else {
-        vscode.window.showErrorMessage('Jira 单号获取失败, 无法生成Commit Message')
+      const repo = getGitRepo(gitExtension)
+
+      if (repo) {
+        const jiraId = getJiraId(repo)
+        if (jiraId) {
+          const commitMessage = `feat[${jiraId}]:`
+          repo.inputBox.value = commitMessage
+        } else {
+          vscode.window.showErrorMessage('Jira 单号获取失败, 无法生成Commit Message')
+        }
       }
     }
   )
   context.subscriptions.push(createCommitFromBranch)
 
   const openBrowserByBranch = vscode.commands.registerCommand('omni-bo-extension.openBrowserByBranch', () => {
-    const jiraId = getJiraId(gitExtension)
-    if (jiraId) {
-      vscode.env.openExternal(
-        vscode.Uri.parse(`https://office.webullbroker.com/teamup/develop-management/demand/list?issueJiraKey=${jiraId}`)
-      )
-    } else {
-      vscode.window.showErrorMessage('Jira 单号获取失败')
+    const repo = getGitRepo(gitExtension)
+    if (repo) {
+      const jiraId = getJiraId(repo)
+      if (jiraId) {
+        vscode.env.openExternal(
+          vscode.Uri.parse(
+            `https://office.webullbroker.com/teamup/develop-management/demand/list?issueJiraKey=${jiraId}`
+          )
+        )
+      } else {
+        vscode.window.showErrorMessage('Jira 单号获取失败')
+      }
     }
   })
 
@@ -49,19 +56,36 @@ const gitCommitExtensions = (context: vscode.ExtensionContext) => {
 
 export default gitCommitExtensions
 
-const getJiraId = (gitExtension: any) => {
+// 获取当前是哪个 Git 仓库
+const getGitRepo = (gitExtension: any) => {
   let gitAPI = gitExtension.getAPI(1)
-
-  let repo = gitAPI.repositories[0] //当前git 仓库
-  // 获取用户配置的正则
-  const config = vscode.workspace.getConfiguration('commit-helper')
-
-  if (!config.regex) {
-    vscode.window.showErrorMessage('没有请先设置匹配规则')
-    return false
+  const repos = gitAPI.repositories
+  // 如果当前工作区域内只有一个git仓库，则直接返回
+  if (repos.length === 0) {
+    vscode.window.showWarningMessage('当前工作区域内为初始化Git仓库，该功能无法使用')
+    return null
   }
-  const regex = new RegExp(config.regex)
+  if (repos.length === 1) {
+    return gitAPI.repositories[0]
+  }
+  // TODO Hack 如果工作区域内有多个git仓库，则通过当前激活的文档来判断是要提交哪个仓库
+  // 获取当前活动的文档URI
+  const activeEditor = vscode.window.activeTextEditor
+  if (!activeEditor) {
+    vscode.window.showWarningMessage('当前工作区域内有多个Git仓库，并无激活文件，无法得知处于哪个仓库')
+    return null
+  }
+
+  const repo = repos.find((repository: any) => {
+    return activeEditor.document.uri.fsPath.startsWith(repository.rootUri.fsPath)
+  })
+  return repo
+}
+
+const getJiraId = (repo: any) => {
+  const regex = /\/([^\/]+?-\d+)/
+
   const branchName = ((repo.state.HEAD && repo.state.HEAD.name) || '').trim()
 
-  return branchName.match(regex)
+  return branchName.match(regex)?.[1]
 }

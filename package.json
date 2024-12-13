@@ -20,16 +20,6 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "configuration": {
-      "title": "获取单号正则",
-      "properties": {
-        "commit-helper.regex": {
-          "type": "string",
-          "default": "OMNI-\\d+",
-          "description": "根据正则匹配获取当前分支中的jira单号"
-        }
-      }
-    },
     "commands": [
       {
         "command": "omni-bo-extension.createPage",

@@ -23,7 +23,9 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
     )
     panel.webview.html = fs.readFileSync(getPath(`./index.html`), 'utf8')
 
-    const workspacePath = vscode.workspace.workspaceFolders?.[0].uri.path ?? ''
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)
+
+    const workspacePath = workspaceFolder?.uri.path ?? ''
     const relativePath = path.relative(workspacePath, uri.fsPath)
     // 把相对路径传给 webview 展示
     panel.webview.postMessage({ filePath: relativePath })
