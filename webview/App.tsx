@@ -6,7 +6,21 @@ import {
   ProFormInstance
 } from '@ant-design/pro-components'
 import React, { useState, useRef, useEffect, MutableRefObject, useMemo } from 'react'
-import { Button, Typography, Modal, Row, Card, Space, Tabs, Col, Tooltip, message, Skeleton, FormInstance } from 'antd'
+import {
+  Button,
+  Typography,
+  Modal,
+  Row,
+  Card,
+  Space,
+  Tabs,
+  Col,
+  Tooltip,
+  message,
+  Skeleton,
+  FormInstance,
+  Form
+} from 'antd'
 import TableColumEditor from './components/TableColumEditor'
 import { generateColumnsCode, generateTableColumnsConfig, toPascalCase } from './utils'
 import { ExclamationCircleOutlined, MehOutlined, QuestionCircleOutlined, TableOutlined } from '@ant-design/icons'
@@ -50,7 +64,12 @@ export default function App() {
     columnRenderOptions: [],
     searchTypeOptions: []
   })
-  const previewCode = useRef({ formColumnCode: '', tableColumnCode: '' })
+  const previewCode = useRef({ formColumnCode: '', tableColumnCode: '', detailColumnCode: '' })
+  const [tabConfigForm] = Form.useForm()
+
+  const features = Form.useWatch('features', tabConfigForm) ?? []
+
+  const hasDetailFeature = features.includes('detail')
 
   const activeTab = useMemo(() => tabs.find((tab) => tab.key === activeTabKey), [tabs, activeTabKey])
 
@@ -70,12 +89,16 @@ export default function App() {
       ...pageConfig,
       pageName: toPascalCase(pageConfig.pageName),
       tabConfigs: newTabs.map((tab) => {
-        const { formColumnCode, tableColumnCode } = generateColumnsCode(tab.tableColumns, templateConfig)
+        const { formColumnCode, tableColumnCode, detailColumnCode } = generateColumnsCode(
+          tab.tableColumns,
+          templateConfig
+        )
         return {
           features: tab.features,
           tabName: toPascalCase(tab.tabName),
           formColumnCode,
-          tableColumnCode
+          tableColumnCode,
+          detailColumnCode
         }
       })
     }
@@ -138,11 +161,11 @@ export default function App() {
   const handlePreview = async () => {
     const tabTableValues = await tableTableRef.current?.validateFieldsReturnFormatValue?.()
 
-    const { formColumnCode, tableColumnCode } = generateColumnsCode(
+    const { formColumnCode, tableColumnCode, detailColumnCode } = generateColumnsCode(
       Object.entries(tabTableValues).map(([key, values]: any) => ({ ...values, id: key })),
       templateConfig
     )
-    previewCode.current = { formColumnCode, tableColumnCode }
+    previewCode.current = { formColumnCode, tableColumnCode, detailColumnCode }
     setIsModalOpen(true)
   }
 
@@ -294,7 +317,7 @@ export default function App() {
       fieldProps: { showSearch: true, options: templateConfig.columnRenderOptions }
     },
     {
-      title: '是否为搜索条件',
+      title: '是否搜索条件',
       dataIndex: 'isSearchField',
       valueType: 'switch',
       width: 120,
@@ -342,12 +365,24 @@ export default function App() {
         }
       }
     },
+    hasDetailFeature && {
+      title: '仅详情展示',
+      dataIndex: 'isShowInDetail',
+      valueType: 'switch',
+      width: 100
+    },
+    hasDetailFeature && {
+      title: '详情中的排序',
+      dataIndex: 'detailOrder',
+      valueType: 'digit',
+      width: 120
+    },
     {
       title: '操作',
       valueType: 'option',
       width: 50
     }
-  ]
+  ].filter(Boolean)
 
   return (
     <main className="main">
@@ -392,6 +427,7 @@ export default function App() {
             <BetaSchemaForm
               scrollToFirstError
               size="small"
+              form={tabConfigForm}
               formRef={tabFormRef}
               title="Table Columns 设置"
               initialValues={activeTab}
@@ -471,6 +507,13 @@ export default function App() {
               {previewCode.current?.tableColumnCode}
             </Paragraph>
           </Card>
+          {hasDetailFeature && (
+            <Card title="Detail Columns" size="small">
+              <Paragraph copyable className="code-render">
+                {previewCode.current?.detailColumnCode}
+              </Paragraph>
+            </Card>
+          )}
         </Space>
       </Modal>
     </main>

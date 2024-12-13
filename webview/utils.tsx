@@ -85,29 +85,39 @@ export const generateColumnsCode = (configs: any[], templateConfig: any) => {
   const { columnRenderOptions, searchTypeOptions } = templateConfig
   const formColumnCode = configs
     .filter((config) => config.isSearchField)
-    .sort((a, b) => a.searchOrder - b.searchOrder)
+    .sort((a, b) => (a.searchOrder || 0) - (b.searchOrder || 0))
     .map((config) => {
       let extraString = searchTypeOptions.find((option: any) => option.value === config.searchValueType)?.code
       extraString = extraString ? `, ${extraString}` : ''
       return `{ title: '${config.title}', dataIndex: '${config.dataIndex}'${extraString} }`
     })
     .join(',\n\t\t')
-  const tableColumnCode = configs
-    .map((config) => {
-      const code = columnRenderOptions.find((option: any) => option.value === config.columnRender)?.code
-      const values: any = { $title: config.title, $dataIndex: config.dataIndex }
 
-      if (code) {
-        return code.replace(/(\$title|\$dataIndex)/g, function (match: any) {
-          return values[match]
-        })
-      }
-      return `{ title: '${config.title}', dataIndex: '${config.dataIndex}' }`
-    })
+  const getColumnItemCode = (config: any) => {
+    const code = columnRenderOptions.find((option: any) => option.value === config.columnRender)?.code
+    const values: any = { $title: config.title, $dataIndex: config.dataIndex }
+
+    if (code) {
+      return code.replace(/(\$title|\$dataIndex)/g, function (match: any) {
+        return values[match]
+      })
+    }
+    return `{ title: '${config.title}', dataIndex: '${config.dataIndex}' }`
+  }
+
+  const tableColumnCode = configs
+    .filter((config) => !config.isShowInDetail) // 过滤掉仅在详情中要展示的
+    .map(getColumnItemCode)
+    .join(',\n\t\t')
+
+  const detailColumnCode = configs
+    .sort((a, b) => (a.detailOrder || 0) - (b.detailOrder || 0)) // 排序
+    .map(getColumnItemCode)
     .join(',\n\t\t')
   return {
     formColumnCode,
-    tableColumnCode
+    tableColumnCode,
+    detailColumnCode
   }
 }
 

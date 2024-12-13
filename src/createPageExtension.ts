@@ -100,7 +100,7 @@ async function createFiles(
   tabNamePath: string,
   templateConfig: ITemplateConfig
 ) {
-  const { features = [], formColumnCode, tableColumnCode } = tabConfig
+  const { features = [], formColumnCode, tableColumnCode, detailColumnCode } = tabConfig
 
   const files = await fs.readdir(originalDir)
   // 遍历所有文件
@@ -130,6 +130,8 @@ async function createFiles(
       text = text.replace(/\/\* form_columns \*\/(.|\n|\r)*?\/\* form_columns \*\//s, formColumnCode)
       // 4. 替换 tableColumnCode
       text = text.replace(/\/\* table_columns \*\/(.|\n|\r)*?\/\* table_columns \*\//s, tableColumnCode + ',')
+      // 4. 替换 detailColumnCode
+      text = text.replace(/\/\* detail_columns \*\/(.|\n|\r)*?\/\* detail_columns \*\//s, detailColumnCode + ',')
       // 5. 根据所需要的功能替换文件内的内容
       text = extractComments(text, features)
       // 6. 生成路径
