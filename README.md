@@ -29,5 +29,5 @@ Omni BO Vscode 插件
 
 - [x] 支持多单个 `Vscode` 打开多个 `workSpace`
 - [x] columns config 可支持动态配置
-- [ ] detail 页面配置支持
+- [x] detail 页面配置支持
 - [x] feature_download

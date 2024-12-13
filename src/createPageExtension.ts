@@ -202,7 +202,8 @@ function modifyRouterJs(dir: string, pageName: string, templateConfig: ITemplate
   function findRouterJs(dir: string, depth = 0, track = []) {
     const files = fs.readdirSync(dir)
     // 检查包含 'router.ts' 或 'router.tsx' 的文件
-    const routerFile = files.find((file) => file === 'router.ts' || file === 'router.tsx')
+    const regex = /^(router|routes)s?\.tsx?$/
+    const routerFile = files.find((file) => regex.test(file))
 
     if (routerFile) {
       return {
@@ -211,7 +212,7 @@ function modifyRouterJs(dir: string, pageName: string, templateConfig: ITemplate
       }
     }
     const parentDir = path.resolve(dir, '..')
-    if (parentDir !== dir && depth < 3) {
+    if (parentDir !== dir && depth < 4) {
       // @ts-ignore
       track.push(path.basename(dir))
       return findRouterJs(parentDir, depth + 1, track)
