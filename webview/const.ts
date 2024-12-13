@@ -122,6 +122,7 @@ export const columnRenderOptions = [
     code: `{ title: '$title', dataIndex: '$dataIndex', ...ColumnRender.RenderShowMoreDesc }`
   }
 ]
+
 export enum SearchValueTypeEnum {
   Input = 'input',
   AccountNumber = 'accountNumber',

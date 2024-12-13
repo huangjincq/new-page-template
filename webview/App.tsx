@@ -27,6 +27,13 @@ const featuresMap: any = {
 }
 const featuresOptions = Object.keys(featuresMap).map((v) => ({ label: v, value: featuresMap[v] }))
 
+interface ITemplateConfig {
+  filePath: string
+  routePrefix: string
+  columnRenderOptions: { label: string; value: string; code: string }[]
+  searchTypeOptions: { label: string; value: string; code: string }[]
+}
+
 export default function App() {
   const pageFormRef = useRef<ProFormInstance<any>>(null)
   const tabFormRef = useRef<ProFormInstance>()
@@ -36,7 +43,12 @@ export default function App() {
   const [tableValue, setTableValue] = useState<any[]>([])
   const [activeTabKey, setActiveTabKey] = useState(tabs[0].key)
   const [loading, setLoading] = useState(false)
-  const [filePath, setFilePath] = useState('')
+  const [templateConfig, setTemplateConfig] = useState<ITemplateConfig>({
+    filePath: '',
+    routePrefix: '',
+    columnRenderOptions: [],
+    searchTypeOptions: []
+  })
   const previewCode = useRef({ formColumnCode: '', tableColumnCode: '' })
 
   const activeTab = useMemo(() => tabs.find((tab) => tab.key === activeTabKey), [tabs, activeTabKey])
@@ -57,7 +69,7 @@ export default function App() {
       ...pageConfig,
       pageName: toPascalCase(pageConfig.pageName),
       tabConfigs: newTabs.map((tab) => {
-        const { formColumnCode, tableColumnCode } = generateColumnsCode(tab.tableColumns)
+        const { formColumnCode, tableColumnCode } = generateColumnsCode(tab.tableColumns, templateConfig)
         return {
           features: tab.features,
           tabName: toPascalCase(tab.tabName),
@@ -126,7 +138,8 @@ export default function App() {
     const tabTableValues = await tableTableRef.current?.validateFieldsReturnFormatValue?.()
 
     const { formColumnCode, tableColumnCode } = generateColumnsCode(
-      Object.entries(tabTableValues).map(([key, values]: any) => ({ ...values, id: key }))
+      Object.entries(tabTableValues).map(([key, values]: any) => ({ ...values, id: key })),
+      templateConfig
     )
     previewCode.current = { formColumnCode, tableColumnCode }
     setIsModalOpen(true)
@@ -196,9 +209,10 @@ export default function App() {
 
   useEffect(() => {
     window.addEventListener('message', (event) => {
-      const workspaceFolder = event.data?.filePath
-      if (workspaceFolder) {
-        setFilePath(workspaceFolder)
+      const templateConfig: ITemplateConfig = event.data
+      if (templateConfig.filePath || templateConfig.routePrefix) {
+        console.log({ templateConfig })
+        setTemplateConfig(templateConfig)
       }
     })
   }, [])
@@ -211,7 +225,11 @@ export default function App() {
     {
       title: '页面路径',
       dataIndex: 'filePath',
-      renderFormItem: () => <Typography.Text ellipsis={{ tooltip: filePath }}>{filePath ?? ''}</Typography.Text>,
+      renderFormItem: () => (
+        <Typography.Text ellipsis={{ tooltip: templateConfig?.filePath ?? '' }}>
+          {templateConfig?.filePath ?? ''}
+        </Typography.Text>
+      ),
       colProps: { span: 7 }
     },
     {
@@ -221,7 +239,7 @@ export default function App() {
       colProps: { span: 8 }
     },
     {
-      title: '自动添加路由',
+      title: `自动添加（${templateConfig.routePrefix}）前缀的路由`,
       dataIndex: 'autoAddRouter',
       valueType: 'switch',
       initialValue: true,
@@ -272,7 +290,7 @@ export default function App() {
       title: 'Column Render',
       dataIndex: 'columnRender',
       valueType: 'select',
-      fieldProps: { showSearch: true, options: columnRenderOptions }
+      fieldProps: { showSearch: true, options: templateConfig.columnRenderOptions }
     },
     {
       title: '是否为搜索条件',
@@ -300,7 +318,7 @@ export default function App() {
       initialValue: SearchValueTypeEnum.Input,
       fieldProps(form: FormInstance, config: any) {
         return {
-          options: searchValueTypeOptions,
+          options: templateConfig?.searchTypeOptions ?? [],
           disabled: !config.entry.isSearchField,
           showSearch: true,
           allowClear: false

@@ -1,5 +1,5 @@
 import { camelCase, lowerCase, startCase } from 'lodash'
-import { ColumnRenderEnum, columnRenderOptions, SearchValueTypeEnum, searchValueTypeOptions } from './const'
+import { ColumnRenderEnum, SearchValueTypeEnum } from './const'
 import { v4 as uuidv4 } from 'uuid'
 
 /**
@@ -81,23 +81,24 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
 /**
  * @name 根据配置，生成代码文本
  */
-export const generateColumnsCode = (configs: any[]) => {
+export const generateColumnsCode = (configs: any[], templateConfig: any) => {
+  const { columnRenderOptions, searchTypeOptions } = templateConfig
   const formColumnCode = configs
     .filter((config) => config.isSearchField)
     .sort((a, b) => a.searchOrder - b.searchOrder)
     .map((config) => {
-      let extraString = searchValueTypeOptions.find((option) => option.value === config.searchValueType)?.code
+      let extraString = searchTypeOptions.find((option: any) => option.value === config.searchValueType)?.code
       extraString = extraString ? `, ${extraString}` : ''
       return `{ title: '${config.title}', dataIndex: '${config.dataIndex}'${extraString} }`
     })
     .join(',\n\t\t')
   const tableColumnCode = configs
     .map((config) => {
-      const code = columnRenderOptions.find((option) => option.value === config.columnRender)?.code
+      const code = columnRenderOptions.find((option: any) => option.value === config.columnRender)?.code
       const values: any = { $title: config.title, $dataIndex: config.dataIndex }
 
       if (code) {
-        return code.replace(/(\$title|\$dataIndex)/g, function (match) {
+        return code.replace(/(\$title|\$dataIndex)/g, function (match: any) {
           return values[match]
         })
       }

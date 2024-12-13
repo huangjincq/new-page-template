@@ -7,6 +7,8 @@ const getPath = (str: string) => path.resolve(__dirname, str)
 const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export', 'button']
 interface ITemplateConfig {
   routePrefix: string
+  columnRenderOptions: { label: string; value: string; code: string }[]
+  searchTypeOptions: { label: string; value: string; code: string }[]
 }
 
 const createPageExtension = (context: vscode.ExtensionContext) => {
@@ -14,14 +16,7 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)
     const workspacePath = workspaceFolder?.uri.path ?? ''
 
-    let templateConfig: ITemplateConfig = { routePrefix: '' }
-    try {
-      const templateConfigPath = fs.existsSync(workspacePath + '/.vscode/templateConfig.json')
-        ? workspacePath + '/.vscode/templateConfig.json'
-        : getPath(`./templateConfig/templateConfig.json`) // 优先取工作项目里面的template，娶不到就用插件里面的模版
-      const data = fs.readFileSync(templateConfigPath, 'utf8')
-      templateConfig = JSON.parse(data)
-    } catch (error) {}
+    const templateConfig = getTemplateConfig(workspacePath) // 模版配置
 
     // 创建并显示新的webview
     const panel = vscode.window.createWebviewPanel(
@@ -40,7 +35,7 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
 
     const relativePath = path.relative(workspacePath, uri.fsPath)
     // 把相对路径传给 webview 展示
-    panel.webview.postMessage({ filePath: relativePath })
+    panel.webview.postMessage({ filePath: relativePath, ...templateConfig })
 
     // 处理 webview 提交过来的数据
     panel.webview.onDidReceiveMessage(
@@ -220,6 +215,20 @@ function modifyRouterJs(dir: string, pageName: string, templateConfig: ITemplate
       return findRouterJs(parentDir, depth + 1, track)
     }
   }
+}
+
+// 获取模版配置的 Json
+const getTemplateConfig = (workspacePath: string): ITemplateConfig => {
+  let templateConfig: ITemplateConfig = { routePrefix: '', columnRenderOptions: [], searchTypeOptions: [] }
+  try {
+    const templateConfigPath = fs.existsSync(workspacePath + '/.vscode/templateConfig.json')
+      ? workspacePath + '/.vscode/templateConfig.json'
+      : getPath(`./templateConfig/templateConfig.json`) // 优先取工作项目里面的template，娶不到就用插件里面的模版
+    const data = fs.readFileSync(templateConfigPath, 'utf8')
+    templateConfig = JSON.parse(data)
+  } catch (error) {}
+
+  return templateConfig
 }
 
 // 创建 多Tab的Index文件
