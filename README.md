@@ -23,6 +23,7 @@ Omni BO Vscode 插件
 
 ### todo
 
-columns config 可支持动态配置
-多工作流配置
-detail 页面配置支持
+- [x] 支持多 workSpace
+- [ ] columns config 可支持动态配置
+- [ ] detail 页面配置支持
+- [ ] feature_download
