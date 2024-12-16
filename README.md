@@ -17,7 +17,7 @@ Omni BO Vscode 插件
 
 ### 配置模版文件
 
-1. 优先读取项目根目录下  `.vscode/template` 中的模版文件，可根据自己的规则配置模版
+1. 优先读取项目根目录下  `.vscode/template` 中的模版文件，可根据 `featureOptions` 的 `value` 来分割线模版功能
 2. 优先读取项目根目录下  `.vscode/templateConfig.json` 中的配置
    
 | 字段名      | 描述 | 默认值 | 示例 |
