@@ -4,9 +4,10 @@ import * as path from 'path'
 import { camelCase, startCase } from 'lodash'
 
 const getPath = (str: string) => path.resolve(__dirname, str)
-const allFeatures = ['batch', 'edit', 'detail', 'delete', 'export', 'download', 'button']
 interface ITemplateConfig {
   routePrefix: string
+  isAutoAddRouter: boolean
+  featureOptions: { label: string; value: string; isDefaultSelected: boolean }[]
   columnRenderOptions: { label: string; value: string; code: string }[]
   searchTypeOptions: { label: string; value: string; code: string }[]
 }
@@ -43,7 +44,7 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
         switch (message.command) {
           case 'submit':
             const pageConfig = JSON.parse(message.data)
-            const { pageName, autoAddRouter, tabConfigs } = pageConfig
+            const { pageName, isAutoAddRouter, tabConfigs } = pageConfig
             const hasMultipleTab = tabConfigs.length > 1 // 是否有多个tab
 
             // 1.获取模版文件路径
@@ -72,7 +73,7 @@ const createPageExtension = (context: vscode.ExtensionContext) => {
             hasMultipleTab && createMultipleTabIndexFile(tabConfigs, pageName, uri, templateConfig)
 
             // 5. 修改路由文件
-            autoAddRouter && modifyRouterJs(uri.fsPath, pageName, templateConfig)
+            isAutoAddRouter && modifyRouterJs(uri.fsPath, pageName, templateConfig)
 
             // 6. 默认打开 index文件进行编辑
             vscode.workspace.openTextDocument(path.join(`${uri.fsPath}/${pageName}`, 'index.tsx')).then((doc) => {
@@ -133,7 +134,7 @@ async function createFiles(
       // 4. 替换 detailColumnCode
       text = text.replace(/\/\* detail_columns \*\/(.|\n|\r)*?\/\* detail_columns \*\//s, detailColumnCode + ',')
       // 5. 根据所需要的功能替换文件内的内容
-      text = extractComments(text, features)
+      text = extractComments(text, features, templateConfig)
       // 6. 生成路径
       let outputFilePath = path.join(outputDir, file)
       await fs.ensureDir(path.dirname(outputFilePath))
@@ -144,7 +145,8 @@ async function createFiles(
 }
 
 // 匹配注释模块，进行文件注释
-function extractComments(text: string, features: string[]) {
+function extractComments(text: string, features: string[], templateConfig: ITemplateConfig) {
+  const allFeatures = templateConfig.featureOptions.map((v) => v.value)
   allFeatures.forEach((pattern) => {
     if (!features.includes(pattern)) {
       const removePattern = new RegExp(
@@ -222,7 +224,13 @@ function modifyRouterJs(dir: string, pageName: string, templateConfig: ITemplate
 
 // 获取模版配置的 Json
 const getTemplateConfig = (workspacePath: string): ITemplateConfig => {
-  let templateConfig: ITemplateConfig = { routePrefix: '', columnRenderOptions: [], searchTypeOptions: [] }
+  let templateConfig: ITemplateConfig = {
+    routePrefix: '',
+    columnRenderOptions: [],
+    searchTypeOptions: [],
+    isAutoAddRouter: true,
+    featureOptions: []
+  }
   try {
     const templateConfigPath = fs.existsSync(workspacePath + '/.vscode/templateConfig.json')
       ? workspacePath + '/.vscode/templateConfig.json'

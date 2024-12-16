@@ -31,20 +31,11 @@ import { maxBy } from 'lodash'
 
 const vscode = (window as any).acquireVsCodeApi ? (window as any).acquireVsCodeApi() : undefined
 
-const featuresMap: any = {
-  '新增&编辑': 'edit',
-  详情: 'detail',
-  删除: 'delete',
-  导出: 'export',
-  下载: 'download',
-  按钮操作: 'button',
-  批量删除: 'batch'
-}
-const featuresOptions = Object.keys(featuresMap).map((v) => ({ label: v, value: featuresMap[v] }))
-
 interface ITemplateConfig {
   filePath: string
   routePrefix: string
+  isAutoAddRouter: boolean
+  featureOptions: { label: string; value: string; isDefaultSelected: boolean }[]
   columnRenderOptions: { label: string; value: string; code: string }[]
   searchTypeOptions: { label: string; value: string; code: string }[]
 }
@@ -61,6 +52,8 @@ export default function App() {
   const [templateConfig, setTemplateConfig] = useState<ITemplateConfig>({
     filePath: '',
     routePrefix: '',
+    isAutoAddRouter: true,
+    featureOptions: [],
     columnRenderOptions: [],
     searchTypeOptions: []
   })
@@ -237,6 +230,11 @@ export default function App() {
       if (templateConfig.filePath || templateConfig.routePrefix) {
         console.log({ templateConfig })
         setTemplateConfig(templateConfig)
+        pageFormRef.current?.setFieldValue('isAutoAddRouter', templateConfig.isAutoAddRouter)
+        tabFormRef.current?.setFieldValue(
+          'features',
+          templateConfig.featureOptions.filter((v) => v.isDefaultSelected).map((v) => v.value)
+        )
       }
     })
   }, [])
@@ -264,7 +262,7 @@ export default function App() {
     },
     {
       title: `自动添加（${templateConfig.routePrefix}）前缀的路由`,
-      dataIndex: 'autoAddRouter',
+      dataIndex: 'isAutoAddRouter',
       valueType: 'switch',
       initialValue: true,
       tooltip: '开启后将自动生成路由配置',
@@ -291,10 +289,9 @@ export default function App() {
       dataIndex: 'features',
       valueType: 'checkbox',
       colProps: { span: 12 },
-      initialValue: ['edit', 'detail', 'delete', 'export'],
       formItemProps: {},
       fieldProps: {
-        options: featuresOptions
+        options: templateConfig?.featureOptions
       }
     }
   ]

@@ -1,5 +1,36 @@
 {
   "routePrefix": "/pt",
+  "isAutoAddRouter": true,
+  "featureOptions": [
+    {
+      "label": "新增&编辑",
+      "value": "edit",
+      "isDefaultSelected": true
+    },
+    {
+      "label": "详情",
+      "value": "detail",
+      "isDefaultSelected": true
+    },
+    {
+      "label": "删除",
+      "value": "delete",
+      "isDefaultSelected": true
+    },
+    {
+      "label": "导出",
+      "value": "export",
+      "isDefaultSelected": true
+    },
+    {
+      "label": "按钮操作",
+      "value": "button"
+    },
+    {
+      "label": "批量删除",
+      "value": "batch"
+    }
+  ],
   "searchTypeOptions": [
     {
       "label": "Input",
