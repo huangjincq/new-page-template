@@ -203,7 +203,11 @@ export default function App() {
   const handleCreateTableColumns = async (str: string) => {
     const currentTableColumns = await tableTableRef.current?.getFieldsValue?.()
 
-    const tableColumns: any = generateTableColumnsConfig(str)
+    const tableColumns: any = generateTableColumnsConfig(
+      str,
+      templateConfig.columnRenderOptions,
+      templateConfig.searchTypeOptions
+    )
 
     if (Object.keys(currentTableColumns).length) {
       Modal.confirm({

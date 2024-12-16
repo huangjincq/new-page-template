@@ -5,11 +5,18 @@ import { v4 as uuidv4 } from 'uuid'
 /**
  * @name 根据输入框的文本智能生成tableColumns配置
  */
-export const generateTableColumnsConfig = (tableColumnStr: string) => {
+export const generateTableColumnsConfig = (
+  tableColumnStr: string,
+  columnRenderOptions: { label: string; value: string; code: string }[],
+  searchTypeOptions: { label: string; value: string; code: string }[]
+) => {
   const fields: string[] = tableColumnStr
     .split('\n')
     .map((v) => v.trim())
     .filter((v) => !!v)
+
+  const columnRenderOptionValues = columnRenderOptions.map((v) => v.value)
+  const searchTypeOptionValues = searchTypeOptions.map((v) => v.value)
 
   return fields.map((field) => {
     // 1. 把dataIndex里面 accountNo 替换成  account Number
@@ -28,44 +35,72 @@ export const generateTableColumnsConfig = (tableColumnStr: string) => {
     let searchValueType = SearchValueTypeEnum.Input
 
     if (lowerCaseIndex.endsWith('accountnumber')) {
-      columnRender = ColumnRenderEnum.AccountNumber
-      searchValueType = SearchValueTypeEnum.AccountNumber
+      if (columnRenderOptionValues.includes(ColumnRenderEnum.AccountNumber)) {
+        columnRender = ColumnRenderEnum.AccountNumber
+      }
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.AccountNumber)) {
+        searchValueType = SearchValueTypeEnum.AccountNumber
+      }
     }
 
     if (['securityid', 'symbol', 'cusip', 'isin'].includes(lowerCaseIndex as string)) {
-      if ('securityid' === lowerCaseIndex) {
+      if ('securityid' === lowerCaseIndex && columnRenderOptionValues.includes(ColumnRenderEnum.Security)) {
         columnRender = ColumnRenderEnum.Security
       }
-      searchValueType = SearchValueTypeEnum.Security
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.Security)) {
+        searchValueType = SearchValueTypeEnum.Security
+      }
     }
 
     if (['countryOfTrade'].includes(lowerCaseIndex as string)) {
-      searchValueType = SearchValueTypeEnum.CountryOfTrade
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.CountryOfTrade)) {
+        searchValueType = SearchValueTypeEnum.CountryOfTrade
+      }
     }
 
     if (lowerCaseIndex.endsWith('date')) {
-      columnRender = ColumnRenderEnum.RenderDayTime
-      searchValueType = SearchValueTypeEnum.Date
+      if (columnRenderOptionValues.includes(ColumnRenderEnum.RenderDayTime)) {
+        columnRender = ColumnRenderEnum.RenderDayTime
+      }
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.Date)) {
+        searchValueType = SearchValueTypeEnum.Date
+      }
     }
 
     if (lowerCaseIndex.endsWith('time')) {
-      columnRender = ColumnRenderEnum.Time
-      searchValueType = SearchValueTypeEnum.Date
+      if (columnRenderOptionValues.includes(ColumnRenderEnum.Time)) {
+        columnRender = ColumnRenderEnum.Time
+      }
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.Date)) {
+        searchValueType = SearchValueTypeEnum.Date
+      }
     }
 
     if (lowerCaseIndex.endsWith('quantity')) {
-      columnRender = ColumnRenderEnum.Number
-      searchValueType = SearchValueTypeEnum.Digit
+      if (columnRenderOptionValues.includes(ColumnRenderEnum.Number)) {
+        columnRender = ColumnRenderEnum.Number
+      }
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.Digit)) {
+        searchValueType = SearchValueTypeEnum.Digit
+      }
     }
 
     if (lowerCaseIndex.endsWith('status')) {
-      columnRender = ColumnRenderEnum.ValueEnum
-      searchValueType = SearchValueTypeEnum.ValueEnum
+      if (columnRenderOptionValues.includes(ColumnRenderEnum.ValueEnum)) {
+        columnRender = ColumnRenderEnum.ValueEnum
+      }
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.ValueEnum)) {
+        searchValueType = SearchValueTypeEnum.ValueEnum
+      }
     }
 
     if (lowerCaseIndex.endsWith('approvestatus')) {
-      columnRender = ColumnRenderEnum.ApproveStatus
-      searchValueType = SearchValueTypeEnum.Input
+      if (columnRenderOptionValues.includes(ColumnRenderEnum.ApproveStatus)) {
+        columnRender = ColumnRenderEnum.ApproveStatus
+      }
+      if (searchTypeOptionValues.includes(SearchValueTypeEnum.Input)) {
+        searchValueType = SearchValueTypeEnum.Input
+      }
     }
 
     return {
